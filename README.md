@@ -1,6 +1,12 @@
-# CSV 文档生成器 (CSV Documentation Generator)
+# CSV 文档生成器 (CSV Documentation Generator) v1.0
+
+[![Version](https://img.shields.io/badge/version-1.0-blue.svg)](CHANGELOG.md)
+[![GAMP 5](https://img.shields.io/badge/GAMP-5%20Second%20Edition-green.svg)](references/gamp-5.md)
+[![21 CFR Part 11](https://img.shields.io/badge/21%20CFR%20Part%2011-Compliant-orange.svg)](references/21cfr-part11.md)
 
 计算机化系统验证 (Computerized System Validation, CSV) 文档自动生成工具。支持中英双语模板，适用于制药、医疗器械行业的验证文档编制。
+
+**[版本历史 (Changelog)](CHANGELOG.md)**
 
 ## AI Agent 安装指南
 
@@ -224,14 +230,34 @@ python3 scripts/generate.py rtm \
 csv-documentation-generator/
 ├── SKILL.md                           # 主技能文件
 ├── README.md                          # 说明文档
+├── CHANGELOG.md                       # 版本历史
 ├── requirements.txt                   # Python 依赖
+├── .csv-docs-config.json             # 项目配置 (AI Agent)
+├── requirements.json                  # 需求数据库 (AI Agent)
+├── audit-log.json                    # 审计日志 (AI Agent)
 ├── scripts/
 │   ├── __init__.py
-│   ├── generate.py                   # 主入口脚本
+│   ├── cli.py                        # 统一 CLI (csv-docs)
+│   ├── generate.py                   # 文档生成器
+│   ├── agent.py                      # Agent 模式检测
 │   ├── config.py                     # 配置管理
 │   ├── word_generator.py             # Word 生成器
 │   ├── excel_generator.py            # Excel 生成器
-│   └── template_loader.py            # 模板加载器
+│   ├── template_loader.py            # 模板加载器
+│   ├── requirements/                 # 需求追踪模块
+│   │   ├── __init__.py
+│   │   ├── parser.py                 # 需求解析 + eSig 检测
+│   │   ├── risk_analyzer.py          # RPN/FMEA 风险评估
+│   │   └── linker.py                 # Git 提交关联
+│   ├── tests/                        # 测试结果模块
+│   │   ├── __init__.py
+│   │   └── parser.py                 # JUnit/pytest 测试解析
+│   ├── fill/                         # 文档填充模块
+│   │   ├── __init__.py
+│   │   └── filler.py                 # 自动填充变量
+│   └── audit/                        # 审计日志模块
+│       ├── __init__.py
+│       └── log.py                    # 审计日志 + PDF 导出
 ├── templates/
 │   ├── vp.md                        # 验证计划模板
 │   ├── urs.md                       # 用户需求模板
