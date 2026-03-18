@@ -29,12 +29,12 @@ class Colors:
     TEXT_SECONDARY = RGBColor(107, 114, 128)  # #6B7280 - Medium gray
     TEXT_WHITE = RGBColor(255, 255, 255)  # White
 
-    # Table colors
-    TABLE_HEADER_BG = RGBColor(44, 82, 130)  # #2C5282 - Header blue
-    TABLE_HEADER_TEXT = RGBColor(255, 255, 255)
+    # Table colors - Lighter blue for better readability
+    TABLE_HEADER_BG = RGBColor(70, 130, 180)  # #4682B4 - Steel blue (lighter)
+    TABLE_HEADER_TEXT = RGBColor(255, 255, 255)  # White text
     TABLE_ROW_EVEN = RGBColor(255, 255, 255)
-    TABLE_ROW_ODD = RGBColor(249, 250, 251)  # #F9FAFB
-    TABLE_BORDER = RGBColor(203, 213, 225)  # #CBD5E1
+    TABLE_ROW_ODD = RGBColor(240, 248, 255)  # #F0F8FF - Alice blue
+    TABLE_BORDER = RGBColor(180, 190, 200)
 
     # Status colors - Professional/muted
     STATUS_PASS = RGBColor(5, 150, 105)  # #059669 - Deep green
@@ -315,18 +315,24 @@ class WordGenerator:
 
     def _style_header_cell(self, cell: _Cell):
         """Style table header cell"""
+        # Clear existing and set text
         cell.text = cell.text
+
+        # Set background color
         shading = OxmlElement("w:shd")
-        shading.set(qn("w:fill"), "2C5282")
+        shading.set(qn("w:fill"), "4682B4")  # Steel blue
         cell._tc.get_or_add_tcPr().append(shading)
 
+        # Clear and rebuild paragraph with proper styling
         para = cell.paragraphs[0]
+        para.clear()
         para.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        for run in para.runs:
-            run.font.bold = True
-            run.font.color.rgb = Colors.TEXT_WHITE
-            run.font.size = Pt(10)
+        # Add styled run
+        run = para.add_run(cell.text)
+        run.font.bold = True
+        run.font.color.rgb = Colors.TEXT_WHITE
+        run.font.size = Pt(10)
 
     def _style_cell(self, cell: _Cell):
         """Style table cell"""

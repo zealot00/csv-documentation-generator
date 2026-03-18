@@ -14,22 +14,57 @@
 
 ---
 
-## 1. 目的 / Purpose
+## 1. 执行摘要 / Executive Summary
 
-本文档总结 {SYSTEM_NAME} 系统的验证活动、结果和结论，证明系统满足用户需求并适合投入使用。
+### 1.1 项目概述 / Project Overview
 
-This document summarizes the validation activities, results, and conclusions for {SYSTEM_NAME}, demonstrating that the system meets user requirements and is suitable for use.
+{SYSTEM_NAME} 系统验证项目于 [起始日期] 启动，于 [结束日期] 完成验证测试。本报告总结了验证活动的执行情况、测试结果和最终结论。
+
+### 1.2 验证目标 / Validation Objectives
+
+| 目标 / Objective | 完成情况 |
+|----------------|---------|
+| 验证系统功能符合用户需求 | [是]/[否] |
+| 验证系统符合法规要求 (21 CFR Part 11, EU Annex 11) | [是]/[否] |
+| 验证系统性能满足要求 | [是]/[否] |
+| 验证系统安全配置正确 | [是]/[否] |
+| 确保系统可以投入生产使用 | [是]/[否] |
+
+### 1.3 验证结果摘要 / Validation Results Summary
+
+| 验证阶段 | 状态 | 测试用例 | 通过 | 失败 | 通过率 |
+|---------|------|---------|------|------|-------|
+| IQ | [完成] | | | | |
+| OQ | [完成] | | | | |
+| PQ | [完成] | | | | |
+| **总计** | | | | | |
+
+**最终结论: [通过] / [有条件通过] / [失败]**
 
 ## 2. 系统概述 / System Overview
 
 ### 2.1 系统描述 / System Description
 
-{SYSTEM_NAME} 是一个用于 [系统用途] 的计算机化系统。
+| 项目 | 内容 |
+|------|------|
+| 系统名称 | {SYSTEM_NAME} |
+| 系统版本 | {SYSTEM_VERSION} |
+| 系统类型 | [描述系统类型] |
+| 主要功能 | [列出主要功能] |
+| 部署环境 | [生产/云/本地] |
 
-### 2.2 验证范围 / Validation Scope
+### 2.2 系统架构 / System Architecture
 
-| 阶段 / Phase | 文档编号 / Document ID | 版本 / Version | 状态 / Status |
-|-------------|---------------------|---------------|--------------|
+[简要描述系统架构]
+
+```
+[插入系统架构图]
+```
+
+### 2.3 验证范围 / Validation Scope
+
+| 阶段 | 文档编号 | 版本 | 状态 |
+|------|---------|------|------|
 | 验证计划 / VP | | | 完成 |
 | 用户需求规格 / URS | | | 完成 |
 | 功能规格 / FS | | | 完成 |
@@ -38,114 +73,259 @@ This document summarizes the validation activities, results, and conclusions for
 | 安装确认 / IQ | | | 完成 |
 | 操作确认 / OQ | | | 完成 |
 | 性能确认 / PQ | | | 完成 |
+| 验证总结报告 / VSR | | | 完成 |
 
 ## 3. 验证执行摘要 / Validation Execution Summary
 
 ### 3.1 验证周期 / Validation Timeline
 
-| 阶段 / Phase | 开始日期 / Start Date | 结束日期 / End Date | 持续时间 / Duration |
-|-------------|---------------------|---------------------|-------------------|
+| 阶段 | 开始日期 | 结束日期 | 持续时间(天) |
+|------|---------|---------|------------|
 | 计划阶段 / Planning | | | |
 | 规格阶段 / Specification | | | |
 | 实施阶段 / Implementation | | | |
-| 确认阶段 / Qualification | | | |
+| IQ确认 / IQ | | | |
+| OQ确认 / OQ | | | |
+| PQ确认 / PQ | | | |
+| 报告阶段 / Reporting | | | |
+| **总计** | | | |
 
 ### 3.2 验证资源 / Validation Resources
 
-| 角色 / Role | 人数 / Count | 总工时 / Total Hours |
-|------------|-------------|---------------------|
-| 项目经理 / Project Manager | | |
-| 测试工程师 / Test Engineers | | |
-| 开发人员 / Developers | | |
-| QA 审核员 / QA Reviewers | | |
-| **总计 / Total** | | |
+| 角色 | 人数 | 总工时 |
+|------|------|-------|
+| 验证经理 | | |
+| 项目经理 | | |
+| 测试工程师 | | |
+| 开发人员 | | |
+| QA审核员 | | |
+| 业务代表 | | |
+| **总计** | | |
+
+### 3.3 验证活动 / Validation Activities
+
+| 活动 | 交付物 | 完成日期 | 状态 |
+|------|-------|---------|------|
+| 验证计划编写 | VP | | 完成 |
+| URS编写与审核 | URS | | 完成 |
+| FS/TS编写 | FS/TS | | 完成 |
+| 风险评估 | RA | | 完成 |
+| IQ测试执行 | IQ报告 | | 完成 |
+| OQ测试执行 | OQ报告 | | 完成 |
+| PQ测试执行 | PQ报告 | | 完成 |
 
 ## 4. 验证结果汇总 / Validation Results Summary
 
-### 4.1 测试执行统计 / Test Execution Statistics
+### 4.1 IQ 结果 / IQ Results
 
-| 阶段 / Phase | 总测试用例 / Total Test Cases | 通过 / Pass | 失败 / Fail | 通过率 / Pass Rate |
-|-------------|------------------------------|------------|------------|-------------------|
-| IQ | | | | |
-| OQ | | | | |
-| PQ | | | | |
-| **总计 / Total** | | | | |
+#### 4.1.1 测试结果统计 / Test Results Summary
 
-### 4.2 缺陷统计 / Defect Statistics
+| 项目 | 总数 | 通过 | 失败 | 通过率 |
+|------|------|------|------|-------|
+| 硬件 | | | | |
+| 操作系统 | | | | |
+| 中间件 | | | | |
+| 应用程序 | | | | |
+| 网络 | | | | |
+| 安全 | | | | |
+| **总计** | | | | |
 
-| 类别 / Category | 数量 / Count | 关闭数量 / Closed | 关闭率 / Closure Rate |
-|---------------|-------------|------------------|----------------------|
-| 严重缺陷 / Critical | | | |
-| 重大缺陷 / Major | | | |
-| 轻微缺陷 / Minor | | | |
-| **总计 / Total** | | | |
+#### 4.1.2 偏差汇总 / Deviations
 
-## 5. 偏差汇总 / Deviation Summary
+| 偏差ID | 描述 | 严重程度 | 状态 |
+|--------|------|---------|------|
+| | | | 已关闭/开放 |
 
-| 偏差编号 / Deviation ID | 阶段 / Phase | 描述 / Description | 关闭日期 / Closure Date | 状态 / Status |
-|----------------------|-------------|-------------------|----------------------|--------------|
-| | | | | Open/Closed |
+**IQ结论**: [通过] / [有条件通过] / [失败]
+
+### 4.2 OQ 结果 / OQ Results
+
+#### 4.2.1 测试结果统计 / Test Results Summary
+
+| 测试类别 | 总用例数 | 通过 | 失败 | 通过率 |
+|---------|---------|------|------|-------|
+| 用户管理 | | | | |
+| 认证授权 | | | | |
+| 审计追踪 | | | | |
+| 数据管理 | | | | |
+| 接口功能 | | | | |
+| 边界测试 | | | | |
+| 错误处理 | | | | |
+| **总计** | | | | |
+
+#### 4.2.2 缺陷统计 / Defect Statistics
+
+| 严重级别 | 发现数量 | 已修复 | 已关闭 | 遗留 |
+|---------|---------|-------|-------|------|
+| 严重 / Critical | | | | |
+| 重大 / Major | | | | |
+| 轻微 / Minor | | | | |
+| **总计** | | | | |
+
+#### 4.2.3 偏差汇总 / Deviations
+
+| 偏差ID | 描述 | 严重程度 | 状态 |
+|--------|------|---------|------|
+| | | | 已关闭/开放 |
+
+**OQ结论**: [通过] / [有条件通过] / [失败]
+
+### 4.3 PQ 结果 / PQ Results
+
+#### 4.3.1 性能测试结果 / Performance Test Results
+
+| 指标 | 要求 | 实际结果 | 结论 |
+|------|------|---------|------|
+| 响应时间 | < 3秒 | | [Pass]/[Fail] |
+| 并发用户 | ≥ 50 | | [Pass]/[Fail] |
+| 系统可用性 | ≥ 99.5% | | [Pass]/[Fail] |
+| CPU使用率 | < 80% | | [Pass]/[Fail] |
+| 内存使用率 | < 85% | | [Pass]/[Fail] |
+
+#### 4.3.2 稳定性测试结果 / Stability Test Results
+
+| 测试 | 持续时间 | 结果 |
+|------|---------|------|
+| 24小时运行测试 | 24小时 | 通过/失败 |
+| 7天运行测试 | 7天 | 通过/失败 |
+
+**PQ结论**: [通过] / [有条件通过] / [失败]
+
+## 5. 需求可追溯性 / Requirements Traceability
+
+### 5.1 URS 需求验证状态 / URS Requirements Verification Status
+
+| 需求ID | 需求描述 | 验证方法 | 验证状态 | 测试用例ID |
+|--------|---------|---------|---------|-----------|
+| UR-001 | | 测试 | [通过] | OQ-xxx |
+| UR-002 | | 测试 | [通过] | OQ-xxx |
+| ... | | | | |
+
+### 5.2 需求覆盖率 / Requirements Coverage
+
+| 需求来源 | 总需求数 | 已验证 | 覆盖率 |
+|----------|---------|--------|-------|
+| URS | | | 100% |
+| FS | | | 100% |
+| RA | | | 100% |
 
 ## 6. 风险评估回顾 / Risk Assessment Review
 
 ### 6.1 初始风险 / Initial Risks
 
-| 风险 ID / Risk ID | 风险描述 / Risk Description | 初始 RPN / Initial RPN | 最终 RPN / Final RPN | 状态 / Status |
-|------------------|---------------------------|----------------------|---------------------|--------------|
-| | | | | Accepted/Mitigated |
+| 风险ID | 风险描述 | 严重性 | 可能性 | RPN | 状态 |
+|--------|---------|--------|--------|-----|------|
+| RA-001 | | | | | 已缓解/接受 |
+| RA-002 | | | | | 已缓解/接受 |
 
-### 6.2 残余风险 / Residual Risks
+### 6.2 缓解措施 / Mitigation Measures
 
-[列出验证后仍然存在的残余风险]
+| 风险ID | 缓解措施 | 实施状态 | 残余风险 |
+|--------|---------|---------|---------|
+| | | 已实施 | |
 
-## 7. 变更控制 / Change Control
+### 6.3 残余风险 / Residual Risks
 
-| 变更编号 / Change ID | 描述 / Description | 审批日期 / Approval Date | 影响评估 / Impact Assessment |
-|--------------------|-------------------|------------------------|---------------------------|
-| | | | |
+| 风险ID | 残余风险描述 | RPN | 接受决定 |
+|--------|-------------|-----|---------|
+| | | | QA批准 |
 
-## 8. 培训记录 / Training Records
+## 7. 偏差汇总 / Deviation Summary
 
-| 培训项目 / Training Topic | 培训日期 / Training Date | 参加人数 / Participants | 培训结果 / Result |
-|-------------------------|------------------------|----------------------|-------------------|
-| | | | |
+### 7.1 偏差趋势 / Deviation Trend
 
-## 9. 验证结论 / Validation Conclusion
+| 阶段 | 偏差数 | 已关闭 | 开放 | 关闭率 |
+|------|-------|-------|------|-------|
+| IQ | | | | |
+| OQ | | | | |
+| PQ | | | | |
+| **总计** | | | | |
 
-### 9.1 功能符合性 / Functional Compliance
+### 7.2 未关闭偏差 / Open Deviations
 
-| 需求来源 / Source | 需求数量 / Requirements | 已验证 / Verified | 符合 / Compliant |
-|------------------|----------------------|------------------|-----------------|
-| URS | | | |
-| FS | | | |
+| 偏差ID | 阶段 | 描述 | 影响评估 | 计划关闭日期 |
+|--------|------|------|---------|-------------|
+| | | | | |
 
-### 9.2 质量符合性 / Quality Compliance
+## 8. 变更控制 / Change Control
 
-| 检查项 / Check Item | 状态 / Status | 备注 / Notes |
-|--------------------|--------------|-------------|
-| 文档完整性 / Document Completeness | | |
-| 审核批准记录 / Review and Approval Records | | |
-| 审计追踪功能 / Audit Trail Function | | |
-| 权限控制功能 / Access Control Function | | |
-| 数据完整性 / Data Integrity | | |
+| 变更编号 | 描述 | 变更类型 | 审批日期 | 影响评估 |
+|----------|------|---------|---------|---------|
+| | | | | |
 
-### 9.3 最终结论 / Final Conclusion
+## 9. 培训记录 / Training Records
+
+| 培训项目 | 培训日期 | 参加人数 | 培训结果 | 备注 |
+|---------|---------|---------|---------|------|
+| 系统操作培训 | | | 完成 | |
+| 管理员培训 | | | 完成 | |
+| 验证培训 | | | 完成 | |
+
+## 10. 验证结论 / Validation Conclusion
+
+### 10.1 功能符合性 / Functional Compliance
+
+| 检查项 | 状态 | 备注 |
+|--------|------|------|
+| 所有必须需求已实现 | [通过] | |
+| 功能测试全部通过 | [通过] | |
+| 用户角色权限正确 | [通过] | |
+| 审计追踪功能完整 | [通过] | |
+
+### 10.2 质量符合性 / Quality Compliance
+
+| 检查项 | 状态 | 备注 |
+|--------|------|------|
+| 文档完整性 | [通过] | |
+| 审核批准记录完整 | [通过] | |
+| 培训记录完整 | [通过] | |
+| 变更控制记录完整 | [通过] | |
+
+### 10.3 法规符合性 / Regulatory Compliance
+
+| 检查项 | 状态 | 备注 |
+|--------|------|------|
+| 21 CFR Part 11 合规 | [通过] | |
+| EU Annex 11 合规 | [通过] | |
+| 数据完整性 (ALCOA+) | [通过] | |
+| GAMP 5 要求 | [通过] | |
+
+### 10.4 最终结论 / Final Conclusion
 
 基于上述验证结果，验证团队得出以下结论:
 
 - [ ] 系统满足所有用户需求
-- [ ] 系统通过所有确认测试
+- [ ] 系统通过所有确认测试 (IQ/OQ/PQ)
+- [ ] 系统符合相关法规要求
 - [ ] 所有偏差已关闭或在案
 - [ ] 残余风险已评估并可接受
-- [ ] 系统可以投入使用
+- [ ] 培训已完成
 
-**验证结论: 通过 (PASS) / 失败 (FAIL) / 有条件通过 (CONDITIONAL PASS)**
+**验证结论: [通过 (PASS)] / [有条件通过 (CONDITIONAL PASS)] / [失败 (FAIL)]**
 
-## 10. 后续建议 / Recommendations
+## 11. 后续建议 / Recommendations
 
-[列出后续建议，包括系统维护、持续改进建议]
+### 11.1 运营建议 / Operational Recommendations
 
-## 11. 批准 / Approval
+| 建议 | 优先级 | 负责方 |
+|------|--------|-------|
+| | | |
+
+### 11.2 维护建议 / Maintenance Recommendations
+
+| 建议 | 优先级 | 负责方 |
+|------|--------|-------|
+| 定期执行安全更新 | 高 | IT |
+| 定期执行数据备份验证 | 高 | IT |
+| 定期审查审计日志 | 中 | QA |
+
+### 11.3 持续改进 / Continuous Improvement
+
+| 改进项 | 建议 | 优先级 |
+|--------|------|--------|
+| | | |
+
+## 12. 批准 / Approval
 
 | 角色 / Role | 签名 / Signature | 日期 / Date |
 |-------------|-----------------|-------------|
@@ -162,23 +342,23 @@ This document summarizes the validation activities, results, and conclusions for
 
 ### 附录 A: 验证交付物清单 / Appendix A: Validation Deliverables Checklist
 
-| # | 交付物 / Deliverable | 文档编号 / Document ID | 版本 / Version | 状态 / Status |
-|---|---------------------|---------------------|---------------|--------------|
-| 1 | 验证计划 / Validation Plan | | | Complete |
-| 2 | 用户需求规格 / URS | | | Complete |
-| 3 | 功能规格 / FS | | | Complete |
-| 4 | 技术规格 / TS | | | Complete |
-| 5 | 风险评估 / RA | | | Complete |
-| 6 | IQ 协议与报告 / IQ Protocol & Report | | | Complete |
-| 7 | OQ 协议与报告 / OQ Protocol & Report | | | Complete |
-| 8 | PQ 协议与报告 / PQ Protocol & Report | | | Complete |
-| 9 | 追溯矩阵 / RTM | | | Complete |
-| 10 | 验证总结报告 / VSR | | | Complete |
+| # | 交付物 | 文档编号 | 版本 | 状态 | 日期 |
+|---|-------|---------|------|------|------|
+| 1 | 验证计划 / VP | | | Complete | |
+| 2 | 用户需求规格 / URS | | | Complete | |
+| 3 | 功能规格 / FS | | | Complete | |
+| 4 | 技术规格 / TS | | | Complete | |
+| 5 | 风险评估 / RA | | | Complete | |
+| 6 | IQ协议与报告 | | | Complete | |
+| 7 | OQ协议与报告 | | | Complete | |
+| 8 | PQ协议与报告 | | | Complete | |
+| 9 | 追溯矩阵 / RTM | | | Complete | |
+| 10 | 验证总结报告 / VSR | | | Complete | |
 
 ### 附录 B: 缩写与术语 / Appendix B: Abbreviations and Terms
 
-| 缩写 / Abbreviation | 全称 / Full Term | 中文 / Chinese |
-|--------------------|------------------|---------------|
+| 缩写 | 全称 | 中文 |
+|------|------|------|
 | CSV | Computerized System Validation | 计算机化系统验证 |
 | URS | User Requirements Specification | 用户需求规格 |
 | FS | Functional Specification | 功能规格 |
@@ -189,3 +369,16 @@ This document summarizes the validation activities, results, and conclusions for
 | PQ | Performance Qualification | 性能确认 |
 | VSR | Validation Summary Report | 验证总结报告 |
 | RTM | Requirements Traceability Matrix | 需求追溯矩阵 |
+| RPN | Risk Priority Number | 风险优先级数 |
+| MTTR | Mean Time To Recovery | 平均恢复时间 |
+| RTO | Recovery Time Objective | 恢复时间目标 |
+| RPO | Recovery Point Objective | 恢复点目标 |
+
+### 附录 C: 参考文档 / Appendix C: Reference Documents
+
+| 文档名称 | 文档编号 | 版本 |
+|---------|---------|------|
+| 21 CFR Part 11 | - | - |
+| EU Annex 11 | - | - |
+| GAMP 5 | - | Second Edition |
+| 数据完整性指南 | - | - |
