@@ -358,6 +358,45 @@ python3 scripts/generate.py all --sync \
 4. Auto-appends new module sections if missing
 5. Backs up original template before modification
 
+### Sync Template to Database
+
+Use `--sync-template-to-db` to extract requirements from templates and add them to `requirements.json`:
+
+```bash
+# Extract requirements from urs.md template to requirements.json
+python3 scripts/generate.py urs --sync-template-to-db \
+  --project "临床系统" \
+  --system "EDC v1.0" \
+  --category 4 \
+  --output ./validation/
+```
+
+**What `--sync-template-to-db` does:**
+1. Reads the template (e.g., urs.md)
+2. Extracts all requirements in `| URS-xxx | description |` format
+3. Loads existing requirements.json (if exists)
+4. Adds new requirements that don't already exist
+5. Preserves existing requirements and test results
+
+### Important Notes
+
+#### Template Requirements Are Examples
+The URS/FS/TS IDs and descriptions in templates are **examples only**. For actual projects:
+1. Review and modify template requirements based on real system needs
+2. Delete or replace example requirements as appropriate
+3. Use `--sync-template-to-db` to populate initial requirements, then customize
+
+#### Change-Driven Risk Assessment (GxP)
+Per GxP requirements, any system change requires a risk assessment. When generating RA documents, include the change description:
+
+```bash
+python3 scripts/generate.py ra \
+  --project "临床系统" \
+  --system "EDC v1.0" \
+  --change-description "升级数据库从 v12 到 v14" \
+  --output ./validation/
+```
+
 ### Parsing Requirements from Code
 
 ```bash

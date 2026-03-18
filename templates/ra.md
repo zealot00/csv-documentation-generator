@@ -20,6 +20,13 @@
 
 This document presents the risk assessment for {SYSTEM_NAME}, identifying potential risks, evaluating risk levels, and defining risk mitigation measures.
 
+## 1.5 变更说明 / Change Description
+
+{CHANGE_DESCRIPTION}
+
+> **Note / 注意**: Per GxP requirements, any system change requires a risk assessment. Please describe the change being assessed above.
+> 根据 GxP 要求，任何系统变更都需要进行风险评估。请在上方描述被评估的变更内容。
+
 ## 2. 范围 / Scope
 
 ### 2.1 评估范围 / Assessment Scope

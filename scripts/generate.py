@@ -256,10 +256,127 @@ Examples:
         help="Sync requirements from requirements.json to template before generating",
     )
 
+    parser.add_argument(
+        "--sync-template-to-db",
+        action="store_true",
+        help="Sync template requirements to requirements.json (e.g., extract URS from urs.md template)",
+    )
+
+    parser.add_argument(
+        "--db",
+        dest="db_path",
+        default=None,
+        help="Path to requirements.json database file",
+    )
+
     return parser.parse_args()
 
 
-def generate_document(doc_type: str, config: Config):
+def generate_traceability_table_markdown(db: Dict[str, Any]) -> str:
+    """Generate markdown table for VSR traceability section from database
+
+    Returns markdown table string with headers: | 需求ID | 需求描述 | 验证方法 | 验证状态 | 测试用例ID |
+    """
+    requirements = db.get("requirements", [])
+    test_results = db.get("test_results", [])
+
+    if not requirements:
+        return "| 需求ID | 需求描述 | 验证方法 | 验证状态 | 测试用例ID |\n|----|---------|---------|---------|-----------|\n| (无需求) | | | | |"
+
+    # Create test results lookup
+    test_results_by_req: Dict[str, List[Dict]] = {}
+    for tr in test_results:
+        req_id = tr.get("requirement_id")
+        if req_id:
+            if req_id not in test_results_by_req:
+                test_results_by_req[req_id] = []
+            test_results_by_req[req_id].append(tr)
+
+    lines = [
+        "| 需求ID | 需求描述 | 验证方法 | 验证状态 | 测试用例ID |",
+        "|------|---------|---------|---------|-----------|",
+    ]
+
+    for req in requirements:
+        req_id = req.get("id", "")
+        desc = (
+            req.get("description", "")[:50] + "..."
+            if len(req.get("description", "")) > 50
+            else req.get("description", "")
+        )
+        priority = req.get("priority", "")
+
+        # Determine verification method
+        verification = (
+            "测试 / Test" if priority in ["必须", "应该"] else "审查 / Review"
+        )
+
+        # Get status and test cases
+        req_results = test_results_by_req.get(req_id, [])
+        if req_results:
+            statuses = set(tr.get("status", "pending") for tr in req_results)
+            status = (
+                "通过 / Pass"
+                if "pass" in statuses
+                else "失败 / Fail"
+                if "fail" in statuses
+                else "待测 / Pending"
+            )
+            test_case_ids = ", ".join(tr.get("test_id", "") for tr in req_results[:3])
+        else:
+            status = "待测 / Pending"
+            test_case_ids = (
+                req.get("test_cases", [{}])[0].get("id", "")
+                if req.get("test_cases")
+                else ""
+            )
+
+        lines.append(
+            f"| {req_id} | {desc} | {verification} | [{status}] | {test_case_ids} |"
+        )
+
+    return "\n".join(lines)
+
+
+def generate_coverage_summary_markdown(db: Dict[str, Any]) -> str:
+    """Generate markdown for requirements coverage summary"""
+    requirements = db.get("requirements", [])
+    test_results = db.get("test_results", [])
+
+    total = len(requirements)
+    verified = 0
+    failed = 0
+    pending = 0
+
+    test_results_by_req = {tr.get("requirement_id"): tr for tr in test_results}
+
+    for req in requirements:
+        req_id = req.get("id")
+        tr = test_results_by_req.get(req_id)
+        if tr:
+            if tr.get("status") == "pass":
+                verified += 1
+            elif tr.get("status") == "fail":
+                failed += 1
+        else:
+            pending += 1
+
+    coverage = f"{(verified / total * 100):.1f}%" if total > 0 else "0%"
+
+    lines = [
+        "| 需求来源 | 总需求数 | 已验证 | 覆盖率 |",
+        "|----------|---------|--------|-------|",
+        f"| URS | {total} | {verified} | {coverage} |",
+        f"| FS | - | - | 100% |",
+        f"| RA | - | - | 100% |",
+    ]
+
+    return "\n".join(lines)
+
+
+def generate_document(
+    doc_type: str, config: Config, db: Optional[Dict[str, Any]] = None
+):
     """Generate a single document"""
 
     # Get template loader
@@ -279,6 +396,19 @@ def generate_document(doc_type: str, config: Config):
     else:
         generate_formats = [config.format]
 
+    # Load requirements database for vsr and rtm
+    if db is None and doc_type in ["vsr", "rtm", "ra"]:
+        project_path = (
+            Path(config.output).parent if config.output != "./output" else Path.cwd()
+        )
+        db_path = find_requirements_db(project_path)
+        if db_path:
+            try:
+                with open(db_path, "r", encoding="utf-8") as f:
+                    db = json.load(f)
+            except Exception:
+                pass
+
     output_files = []
 
     for fmt in generate_formats:
@@ -287,18 +417,12 @@ def generate_document(doc_type: str, config: Config):
             excel_gen = ExcelGenerator(config.output)
 
             # Load requirements database for RTM
-            db = None
+            rtm_db = None
             if doc_type == "rtm":
-                db_path = Path(config.output).parent / "requirements.json"
-                if db_path.exists():
-                    try:
-                        with open(db_path, "r", encoding="utf-8") as f:
-                            db = json.load(f)
-                    except Exception:
-                        pass
+                rtm_db = db
 
             output_file = excel_gen.generate(
-                doc_type=doc_type, variables=variables, db=db
+                doc_type=doc_type, variables=variables, db=rtm_db
             )
             output_files.append(output_file)
             print(f"Generated: {output_file}")
@@ -309,6 +433,19 @@ def generate_document(doc_type: str, config: Config):
             except FileNotFoundError:
                 print(f"Warning: Template not found for {doc_type}, using default")
                 template_content = f"# {doc_info['name']}\n\nDocument: {config.project}\nSystem: {config.system}"
+
+            # Add traceability tables for VSR
+            if doc_type == "vsr" and db:
+                variables["TRACEABILITY_TABLE"] = generate_traceability_table_markdown(
+                    db
+                )
+                variables["COVERAGE_SUMMARY"] = generate_coverage_summary_markdown(db)
+
+            # Add change description placeholder for RA
+            if doc_type == "ra":
+                variables["CHANGE_DESCRIPTION"] = variables.get(
+                    "CHANGE_DESCRIPTION", "[变更描述 / Change Description]"
+                )
 
             word_gen = WordGenerator(config.output)
             output_file = word_gen.generate(
@@ -359,6 +496,36 @@ def generate_all(config: Config):
     return all_files
 
 
+def find_requirements_db(project_path: Path) -> Optional[Path]:
+    """Find requirements.json in multiple possible locations
+
+    Search order:
+    1. project_path / "requirements.json"
+    2. project_path.parent / "requirements.json" (parent directory)
+    3. project_path.parent.parent / "requirements.json" (grandparent directory)
+    4. project_path / "doc" / "requirements.json"
+    5. project_path / "docs" / "requirements.json"
+    6. project_path / "src" / "requirements.json"
+
+    Returns path to requirements.json or None if not found.
+    """
+    search_paths = [
+        project_path / "requirements.json",
+        project_path.parent / "requirements.json",
+        project_path.parent.parent / "requirements.json",
+        project_path / "doc" / "requirements.json",
+        project_path / "docs" / "requirements.json",
+        project_path / "src" / "requirements.json",
+    ]
+
+    for path in search_paths:
+        if path.exists() and path.is_file():
+            print(f"  Found requirements.json at: {path}")
+            return path
+
+    return None
+
+
 def sync_requirements_to_template(
     doc_type: str, project_path: Optional[Path] = None
 ) -> bool:
@@ -366,14 +533,14 @@ def sync_requirements_to_template(
 
     Returns True if sync was performed, False otherwise.
     """
-    if doc_type not in ["urs"]:
+    if doc_type not in ["urs", "fs", "ts"]:
         return False
 
     if project_path is None:
         project_path = Path.cwd()
 
-    db_path = project_path / "requirements.json"
-    if not db_path.exists():
+    db_path = find_requirements_db(project_path)
+    if not db_path:
         print("  No requirements.json found, skipping sync")
         return False
 
@@ -534,6 +701,207 @@ def _generate_module_section(
     return "\n".join(lines)
 
 
+def sync_template_to_db(doc_type: str, project_path: Optional[Path] = None) -> bool:
+    """Sync requirements from template to requirements.json
+
+    Extracts requirements from template (e.g., urs.md) and adds them to requirements.json.
+    Existing requirements are preserved, new ones are added.
+
+    Returns True if sync was performed, False otherwise.
+    """
+    if doc_type != "urs":
+        return False
+
+    if project_path is None:
+        project_path = Path.cwd()
+
+    # Get template path
+    skill_root = get_skill_root()
+    template_path = skill_root / "templates" / f"{doc_type}.md"
+
+    if not template_path.exists():
+        print(f"  Template not found: {template_path}, skipping sync")
+        return False
+
+    # Read template
+    try:
+        with open(template_path, "r", encoding="utf-8") as f:
+            template_content = f.read()
+    except Exception as e:
+        print(f"  Error reading template: {e}")
+        return False
+
+    # Find requirements in template (format: | URS-xxx | description | ...)
+    import re
+
+    pattern = r"\|\s*(URS-\d{3})\s*\|([^|]+)\|"
+    matches = re.findall(pattern, template_content)
+
+    if not matches:
+        print("  No requirements found in template, skipping sync")
+        return False
+
+    print(f"  Found {len(matches)} requirements in template")
+
+    # Load or create requirements.json
+    db_path = find_requirements_db(project_path)
+    if db_path is None:
+        # Create new database in project root
+        db_path = project_path / "requirements.json"
+        db = {
+            "version": "1.0",
+            "requirements": [],
+            "risks": [],
+            "test_results": [],
+            "commit_links": [],
+        }
+        print(f"  Creating new requirements.json at: {db_path}")
+    else:
+        try:
+            with open(db_path, "r", encoding="utf-8") as f:
+                db = json.load(f)
+            print(f"  Loaded existing requirements.json from: {db_path}")
+        except Exception as e:
+            print(f"  Error reading requirements.json: {e}")
+            return False
+
+    # Get existing requirement IDs
+    existing_ids = {r.get("id") for r in db.get("requirements", [])}
+
+    # Add new requirements
+    new_count = 0
+    for req_id, desc in matches:
+        if req_id in existing_ids:
+            continue
+
+        # Infer module from description keywords
+        module = _infer_module_from_description(desc.strip())
+
+        requirement = {
+            "id": req_id,
+            "type": "URS",
+            "description": desc.strip(),
+            "priority": "应该",
+            "module": module,
+            "source_file": str(template_path),
+            "source_line": None,
+            "esig_required": False,
+            "esig_category": None,
+            "fs_ref": None,
+            "ts_ref": None,
+            "test_cases": [],
+            "tags": ["from_template"],
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat(),
+            "status": "draft",
+        }
+
+        db.setdefault("requirements", []).append(requirement)
+        existing_ids.add(req_id)
+        new_count += 1
+
+    if new_count > 0:
+        try:
+            with open(db_path, "w", encoding="utf-8") as f:
+                json.dump(db, f, indent=2, ensure_ascii=False)
+            print(f"  Added {new_count} new requirements to requirements.json")
+            print(f"  Total requirements: {len(db.get('requirements', []))}")
+            return True
+        except Exception as e:
+            print(f"  Error writing requirements.json: {e}")
+            return False
+    else:
+        print("  No new requirements to add")
+        return False
+
+
+def _infer_module_from_description(description: str) -> str:
+    """Infer module from requirement description"""
+    desc_lower = description.lower()
+
+    module_keywords = {
+        "user_mgmt": [
+            "用户",
+            "user",
+            "账户",
+            "account",
+            "登录",
+            "login",
+            "认证",
+            "auth",
+            "密码",
+            "password",
+            "角色",
+            "role",
+            "权限",
+            "permission",
+        ],
+        "audit_trail": [
+            "审计",
+            "audit",
+            "日志",
+            "log",
+            "追踪",
+            "trace",
+            "记录",
+            "record",
+        ],
+        "data_mgmt": [
+            "数据",
+            "data",
+            "数据库",
+            "database",
+            "存储",
+            "storage",
+            "备份",
+            "backup",
+            "恢复",
+            "recovery",
+        ],
+        "business_func": [
+            "业务",
+            "business",
+            "功能",
+            "function",
+            "流程",
+            "process",
+            "工作流",
+            "workflow",
+        ],
+        "reporting": ["报告", "report", "导出", "export", "打印", "print", "报表"],
+        "integration": ["接口", "api", "integration", "集成", "对接"],
+        "security": [
+            "安全",
+            "security",
+            "加密",
+            "encrypt",
+            "解密",
+            "decrypt",
+            "tls",
+            "ssl",
+            "防火墙",
+            "firewall",
+        ],
+        "compliance": [
+            "合规",
+            "compliance",
+            "法规",
+            "regulation",
+            "alcoa",
+            "part 11",
+            "annex 11",
+            "gxp",
+        ],
+    }
+
+    for module_id, keywords in module_keywords.items():
+        for keyword in keywords:
+            if keyword.lower() in desc_lower:
+                return module_id
+
+    return "business_func"
+
+
 def main():
     """Main entry point"""
 
@@ -566,16 +934,25 @@ def main():
         critical_functions=args.critical_functions,
     )
 
+    # Determine project path
+    project_path = Path(args.output).parent if args.output != "./output" else Path.cwd()
+
+    # Handle --sync-template-to-db first (before any document generation)
+    if args.sync_template_to_db:
+        print("\n[Sync Template to DB] Extracting requirements from template...")
+        sync_template_to_db("urs", project_path)
+
     print(f"CSV Documentation Generator")
     print(f"{'=' * 50}")
 
     # Sync requirements to template if --sync is specified
-    if args.sync and args.doc_type == "urs":
+    if args.sync:
         print("\n[Sync] Checking requirements.json for new modules...")
-        project_path = (
-            Path(args.output).parent if args.output != "./output" else Path.cwd()
+        doc_types_to_sync = (
+            ["urs", "fs", "ts"] if args.doc_type == "all" else [args.doc_type]
         )
-        sync_requirements_to_template(args.doc_type, project_path)
+        for doc_type in doc_types_to_sync:
+            sync_requirements_to_template(doc_type, project_path)
 
     # Generate documents
     if args.doc_type == "all":
