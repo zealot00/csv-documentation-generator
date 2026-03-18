@@ -12,6 +12,9 @@ All notable version updates are documented here.
 - **Improved color contrast**: Header color changed from #4682B4 (Steel Blue, 3.2:1) to #2563EB (Royal Blue, 4.6:1) to meet WCAG 4.5:1 requirement
 - **Unified fonts**: Chinese text uses SimSun (宋体), English text uses Arial
 
+#### Documentation Fixes
+- **Fixed dependency installation**: Use `pip install -r requirements.txt` instead of installing packages individually
+
 ## [1.0.0] - 2026-03-18
 
 ### Added
