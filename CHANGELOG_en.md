@@ -2,6 +2,16 @@
 
 All notable version updates are documented here.
 
+## [1.0.1] - 2026-03-18
+
+### Fixed
+
+#### Word Generator Bug Fixes
+- **Fixed table rendering bug**: `_process_content` method was exiting loop after first table, now processes all tables correctly (24 tables rendered)
+- **Fixed header cell text loss bug**: `_style_header_cell` method now receives text as explicit parameter instead of relying on cell.text after `para.clear()`
+- **Improved color contrast**: Header color changed from #4682B4 (Steel Blue, 3.2:1) to #2563EB (Royal Blue, 4.6:1) to meet WCAG 4.5:1 requirement
+- **Unified fonts**: Chinese text uses SimSun (宋体), English text uses Arial
+
 ## [1.0.0] - 2026-03-18
 
 ### Added

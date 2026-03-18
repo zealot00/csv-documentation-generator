@@ -4,6 +4,16 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.0.1] - 2026-03-18
+
+### Fixed
+
+#### Word 生成器 Bug 修复
+- **修复表格渲染 bug**: `_process_content` 方法之前只处理第一个表格后退出循环，现在正确处理所有表格 (24个表格全部渲染)
+- **修复表头文本丢失 bug**: `_style_header_cell` 方法之前在 `para.clear()` 后无法获取原始文本，现在通过参数显式传递文本
+- **增强颜色对比度**: 表头颜色从 #4682B4 (Steel Blue, 3.2:1) 更新为 #2563EB (Royal Blue, 4.6:1)，满足 WCAG 4.5:1 要求
+- **字体统一**: 中文使用宋体 (SimSun)，英文使用 Arial
+
 ## [1.0.0] - 2026-03-18
 
 ### Added
