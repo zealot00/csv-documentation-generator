@@ -26,6 +26,7 @@ lastReviewedAt: "2026-03-18"
 validationStatus: "validated"
 requiredTools:
   - exec
+  - write
 inputSchema:
   type: object
   required: [project, system]
