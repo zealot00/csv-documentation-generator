@@ -2,6 +2,8 @@
 
 所有重要的版本更新都会记录在此文件中。
 
+**[English Version](CHANGELOG_en.md)**
+
 ## [1.0.0] - 2026-03-18
 
 ### Added

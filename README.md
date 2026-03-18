@@ -6,7 +6,9 @@
 
 计算机化系统验证 (Computerized System Validation, CSV) 文档自动生成工具。支持中英双语模板，适用于制药、医疗器械行业的验证文档编制。
 
-**[版本历史 (Changelog)](CHANGELOG.md)**
+**[版本历史 (Changelog)](CHANGELOG.md)** | **[English Version](README_en.md)**
+
+**[English Changelog](CHANGELOG_en.md)**
 
 ## AI Agent 安装指南
 
