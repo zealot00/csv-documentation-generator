@@ -4,6 +4,15 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.1.2] - 2026-03-18
+
+### Fixed
+
+#### ID 格式统一
+- **统一 ID 前缀**: 将所有 `UR-xxx` 格式替换为 `URS-xxx`，符合 GAMP 5 规范
+- templates/urs.md: UR-001~055 → URS-001~055
+- templates/vsr.md: UR-001~002 → URS-001~002
+
 ## [1.1.1] - 2026-03-18
 
 ### Added

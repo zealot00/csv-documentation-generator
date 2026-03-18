@@ -2,6 +2,15 @@
 
 All notable version updates are documented here.
 
+## [1.1.2] - 2026-03-18
+
+### Fixed
+
+#### ID Format Unification
+- **Unified ID prefix**: Changed all `UR-xxx` to `URS-xxx` to comply with GAMP 5 standard
+- templates/urs.md: UR-001~055 → URS-001~055
+- templates/vsr.md: UR-001~002 → URS-001~002
+
 ## [1.1.1] - 2026-03-18
 
 ### Added
