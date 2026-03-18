@@ -15,7 +15,8 @@
       "tags": [],
       "created_at": "2026-03-18T22:21:32.459032",
       "updated_at": "2026-03-18T22:21:32.459053",
-      "status": "draft"
+      "status": "draft",
+      "module": "business_func"
     },
     {
       "id": "URS-002",
@@ -29,7 +30,8 @@
       "tags": [],
       "created_at": "2026-03-18T22:21:36.505849",
       "updated_at": "2026-03-18T22:21:36.505870",
-      "status": "draft"
+      "status": "draft",
+      "module": "business_func"
     }
   ],
   "risks": [
@@ -78,18 +80,7 @@
       "created_at": "2026-03-18T22:21:40.183609"
     }
   ],
-  "test_results": [
-    {
-      "test_id": "OQ-UM-001",
-      "test_name": "OQ-UM-001",
-      "status": "Pass",
-      "duration": null,
-      "requirement_id": null,
-      "test_type": "OQ",
-      "executed_at": "2026-03-18T22:21:48.128698",
-      "error_message": null
-    }
-  ],
+  "test_results": [],
   "commit_links": [],
   "metadata": {
     "project": null,

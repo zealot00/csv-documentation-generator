@@ -178,6 +178,117 @@ Tables use dual-language headers:
 | 验证计划 | Validation Plan |
 | 用户需求 | User Requirements |
 
+## Requirements Traceability
+
+This skill supports **GAMP 5 compliant requirements traceability** across the entire validation lifecycle.
+
+### Automated Traceability Chain
+
+```
+代码注释 (@URS[module]) 
+    ↓
+requirements.json (需求解析)
+    ↓
+URS 模板 (自动同步章节)
+    ↓
+FS/TS 文档 (引用需求ID)
+    ↓
+测试用例 (关联需求ID)
+    ↓
+测试结果 (解析需求ID)
+    ↓
+RTM (追溯矩阵自动生成)
+```
+
+### Code Comment Standards (AI Agent Must Follow)
+
+When generating code, **AI agents MUST include requirement markers** for automatic traceability:
+
+```python
+# @URS[user_mgmt] 系统应支持基于角色的访问控制 (RBAC)
+# @FS FS-001
+# @TEST[OQ-UM-001] 验证用户角色分配功能
+
+def assign_role(user_id: str, role: str) -> bool:
+    '''
+    @REQ URS-001 - Role-based access control required
+    @TEST[OQ-UM-001] - Test role assignment
+    '''
+    # Implementation...
+```
+
+**Supported comment formats:**
+
+| Pattern | Example | Description |
+|---------|---------|-------------|
+| `// @URS[module]` | `// @URS[user_mgmt] 描述` | Requirement with module |
+| `# @URS[module]` | `# @URS[audit_trail] 描述` | Python-style comment |
+| `/* @URS[module] */` | `/* @URS[security] 描述 */` | Multi-line comment |
+| `// @TEST[type-id]` | `// @TEST[OQ-UM-001] 描述` | Test case link |
+| `// @FS` | `// @FS FS-001` | FS reference |
+| `// @TS` | `// @TS TS-001` | TS reference |
+
+### Standard Modules
+
+| Module ID | 中文名 | English Name | URS Section | Test Prefix |
+|-----------|--------|--------------|-------------|-------------|
+| `user_mgmt` | 用户管理 | User Management | 4.1 | UM |
+| `audit_trail` | 审计追踪 | Audit Trail | 4.2 | AT |
+| `data_mgmt` | 数据管理 | Data Management | 4.3 | DM |
+| `business_func` | 业务功能 | Business Functions | 4.4 | BF |
+| `reporting` | 报告功能 | Reporting | 4.5 | RP |
+| `integration` | 接口集成 | Integration | 4.6 | INT |
+| `security` | 安全 | Security | 5.2 | SEC |
+| `compliance` | 合规 | Compliance | 3.X | CMP |
+
+### Test Case ID Format
+
+Test case IDs follow the format: `{IQ|OQ|PQ}-{ModulePrefix}-{Number}`
+
+| Type | Example | Description |
+|------|---------|-------------|
+| IQ | `IQ-UM-001` | Installation Qualification test |
+| OQ | `OQ-UM-001` | Operational Qualification test |
+| PQ | `PQ-UM-001` | Performance Qualification test |
+
+### Auto-Sync Feature
+
+Before generating documents, use `--sync` to automatically update templates with new requirements:
+
+```bash
+# Generate URS and sync requirements to template
+python3 scripts/generate.py urs --sync \
+  --project "临床系统" \
+  --system "EDC v1.0" \
+  --category 4 \
+  --output ./validation/
+
+# Generate full validation package with sync
+python3 scripts/generate.py all --sync \
+  --project "XX系统" \
+  --system "MES" \
+  --category 4 \
+  --output ./validation/
+```
+
+**What `--sync` does:**
+1. Reads `requirements.json` for all requirements
+2. Groups requirements by module
+3. Checks if each module section exists in template
+4. Auto-appends new module sections if missing
+5. Backs up original template before modification
+
+### Parsing Requirements from Code
+
+```bash
+# Parse source code for requirements
+cd /path/to/your/project
+python3 /path/to/skills/csv-documentation-generator/scripts/generate.py parse ./src
+
+# View extracted requirements
+cat requirements.json
+```
+
 ## Troubleshooting
 
 ### Common Issues

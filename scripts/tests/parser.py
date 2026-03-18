@@ -305,3 +305,40 @@ class TestResultsParser:
                 self._save_test_results()
                 return True
         return False
+
+    def link_results_to_requirements(self) -> Dict[str, int]:
+        """Link test results to requirements and update requirement status
+
+        Returns:
+            Dict with counts of linked, updated, and failed links
+        """
+        stats = {
+            "linked": 0,
+            "updated": 0,
+            "failed": 0,
+            "not_found": 0,
+        }
+
+        for result in self.get_results():
+            if not result.requirement_id:
+                stats["failed"] += 1
+                continue
+
+            # Determine new status based on test result
+            if result.status == "pass":
+                new_status = "verified"
+            elif result.status == "fail":
+                new_status = "failed"
+            else:
+                new_status = "pending"
+
+            # Update requirement status
+            success = self.update_requirement_status(result.requirement_id, new_status)
+
+            if success:
+                stats["linked"] += 1
+                stats["updated"] += 1
+            else:
+                stats["not_found"] += 1
+
+        return stats

@@ -9,8 +9,124 @@ import re
 import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from datetime import datetime
+
+
+STANDARD_MODULES = {
+    "user_mgmt": {
+        "name": "用户管理 / User Management",
+        "name_cn": "用户管理",
+        "prefix": "UM",
+        "keywords": [
+            "用户",
+            "user",
+            "账户",
+            "account",
+            "登录",
+            "login",
+            "认证",
+            "auth",
+            "密码",
+            "password",
+            "角色",
+            "role",
+            "权限",
+            "permission",
+        ],
+    },
+    "audit_trail": {
+        "name": "审计追踪 / Audit Trail",
+        "name_cn": "审计追踪",
+        "prefix": "AT",
+        "keywords": ["审计", "audit", "日志", "log", "追踪", "trace", "记录", "record"],
+    },
+    "data_mgmt": {
+        "name": "数据管理 / Data Management",
+        "name_cn": "数据管理",
+        "prefix": "DM",
+        "keywords": [
+            "数据",
+            "data",
+            "数据库",
+            "database",
+            "存储",
+            "storage",
+            "备份",
+            "backup",
+            "恢复",
+            "recovery",
+        ],
+    },
+    "business_func": {
+        "name": "业务功能 / Business Functions",
+        "name_cn": "业务功能",
+        "prefix": "BF",
+        "keywords": [
+            "业务",
+            "business",
+            "功能",
+            "function",
+            "流程",
+            "process",
+            "工作流",
+            "workflow",
+        ],
+    },
+    "reporting": {
+        "name": "报告功能 / Reporting",
+        "name_cn": "报告功能",
+        "prefix": "RP",
+        "keywords": ["报告", "report", "导出", "export", "打印", "print", "报表"],
+    },
+    "integration": {
+        "name": "接口集成 / Integration",
+        "name_cn": "接口集成",
+        "prefix": "INT",
+        "keywords": ["接口", "api", "integration", "集成", "对接", "integration"],
+    },
+    "security": {
+        "name": "安全 / Security",
+        "name_cn": "安全",
+        "prefix": "SEC",
+        "keywords": [
+            "安全",
+            "security",
+            "加密",
+            "encrypt",
+            "解密",
+            "decrypt",
+            "TLS",
+            "SSL",
+            "防火墙",
+            "firewall",
+        ],
+    },
+    "compliance": {
+        "name": "合规 / Compliance",
+        "name_cn": "合规",
+        "prefix": "CMP",
+        "keywords": [
+            "合规",
+            "compliance",
+            "法规",
+            "regulation",
+            "ALCOA",
+            "Part 11",
+            "Annex 11",
+            "GxP",
+        ],
+    },
+}
+
+
+@dataclass
+class TestCaseLink:
+    """Represents a link to a test case"""
+
+    type: str  # IQ, OQ, PQ
+    id: str
+    description: str = ""
 
 
 @dataclass
@@ -21,16 +137,22 @@ class Requirement:
     type: str  # URS, FS, TS
     description: str
     priority: str  # 必须, 应该, 可以
+    module: str = "business_func"  # default module
     source_file: Optional[str] = None
     source_line: Optional[int] = None
     esig_required: bool = False
     esig_category: Optional[str] = None
-    tags: List[str] = None
+    fs_ref: Optional[str] = None
+    ts_ref: Optional[str] = None
+    test_cases: List[TestCaseLink] = field(default_factory=list)
+    tags: List[str] = field(default_factory=list)
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
     status: str = "draft"  # draft, verified, failed
 
     def __post_init__(self):
+        if self.test_cases is None:
+            self.test_cases = []
         if self.tags is None:
             self.tags = []
         if not self.created_at:
@@ -48,6 +170,29 @@ class RequirementsParser:
         r"#\s*(\w+-\d+)[:\s]+(.+)",  # URS-001: description
         r"#\s*\[(\w+-\d+)\]\s*(.+)",  # [URS-001] description
         r"<!--\s*(\w+-\d+)\s+(.+)-->",  # HTML comment style
+    ]
+
+    # AI Agent friendly patterns with module specification
+    AI_COMMENT_PATTERNS = [
+        r"//\s*@URS\[(\w+)\]\s+(.+)",  # // @URS[user_mgmt] description
+        r"#\s*@URS\[(\w+)\]\s+(.+)",  # # @URS[user_mgmt] description
+        r"/\*\s*@URS\[(\w+)\]\s+(.+)\*/",  # /* @URS[user_mgmt] description */
+        r"--\s*@URS\[(\w+)\]\s+(.+)",  # -- @URS[user_mgmt] description (Haskell/SQL)
+    ]
+
+    # Test case association patterns
+    TEST_CASE_PATTERNS = [
+        r"//\s*@TEST\[(\w+-\w+-\d+)\]\s*(.*)",  # // @TEST[OQ-UM-001] description
+        r"#\s*@TEST\[(\w+-\w+-\d+)\]\s*(.*)",  # # @TEST[OQ-UM-001] description
+        r"/\*\s*@TEST\[(\w+-\w+-\d+)\]\s*(.*)\*/",  # /* @TEST[OQ-UM-001] description */
+    ]
+
+    # FS/TS reference patterns
+    FS_TS_PATTERNS = [
+        r"//\s*@FS\s+(FS-\d+)",  # // @FS FS-001
+        r"#\s*@FS\s+(FS-\d+)",  # # @FS FS-001
+        r"//\s*@TS\s+(TS-\d+)",  # // @TS TS-001
+        r"#\s*@TS\s+(TS-\d+)",  # # @TS TS-001
     ]
 
     # Priority keywords
@@ -178,6 +323,26 @@ class RequirementsParser:
                 return priority
         return "应该"  # Default
 
+    def _infer_module(self, text: str, file_path: Optional[str] = None) -> str:
+        """Infer module from text and optionally file path"""
+        text_lower = text.lower()
+
+        # Check file path first if provided
+        if file_path:
+            path_lower = file_path.lower()
+            for module_id, module_info in STANDARD_MODULES.items():
+                for keyword in module_info.get("keywords", []):
+                    if keyword.lower() in path_lower:
+                        return module_id
+
+        # Then check text content
+        for module_id, module_info in STANDARD_MODULES.items():
+            for keyword in module_info.get("keywords", []):
+                if keyword.lower() in text_lower:
+                    return module_id
+
+        return "business_func"  # Default module
+
     def _parse_requirement_from_match(
         self, match: re.Match, file_path: str, line_num: int
     ) -> Optional[Requirement]:
@@ -244,6 +409,7 @@ class RequirementsParser:
             return requirements
 
         for line_num, line in enumerate(lines, 1):
+            # Try standard patterns first
             for pattern in self.COMMENT_PATTERNS:
                 matches = re.finditer(pattern, line, re.IGNORECASE)
                 for match in matches:
@@ -252,12 +418,58 @@ class RequirementsParser:
                     )
                     if req:
                         requirements.append(req)
-                        break  # One match per line is enough
+                        break
+
+            # Then try AI-friendly patterns
+            for pattern in self.AI_COMMENT_PATTERNS:
+                matches = re.finditer(pattern, line, re.IGNORECASE)
+                for match in matches:
+                    req = self._parse_ai_requirement_from_match(
+                        match, str(file_path), line_num
+                    )
+                    if req:
+                        requirements.append(req)
+                        break
 
         return requirements
 
+    def _parse_ai_requirement_from_match(
+        self, match: re.Match, file_path: str, line_num: int
+    ) -> Optional[Requirement]:
+        """Parse an AI-friendly requirement marker like @URS[module] description"""
+        groups = match.groups()
+
+        if len(groups) < 2:
+            return None
+
+        module = groups[0]
+        description = groups[1].strip()
+
+        if not description or len(description) < 3:
+            return None
+
+        if module not in STANDARD_MODULES:
+            return None
+
+        esig_required, esig_category = self._detect_esig(description)
+        priority = self._extract_priority(description)
+        req_id = self._generate_id("URS")
+
+        return Requirement(
+            id=req_id,
+            type="URS",
+            description=description,
+            priority=priority,
+            module=module,
+            source_file=file_path,
+            source_line=line_num,
+            esig_required=esig_required,
+            esig_category=esig_category,
+            status="draft",
+        )
+
     def parse_directory(
-        self, directory: Path, extensions: List[str] = None
+        self, directory: Path, extensions: Optional[List[str]] = None
     ) -> List[Requirement]:
         """Parse all files in a directory"""
         if extensions is None:
@@ -289,15 +501,18 @@ class RequirementsParser:
         self,
         description: str,
         req_type: str = "URS",
-        priority: str = None,
-        source_file: str = None,
-        source_line: int = None,
+        priority: Optional[str] = None,
+        module: Optional[str] = None,
+        source_file: Optional[str] = None,
+        source_line: Optional[int] = None,
     ) -> Requirement:
         """Manually add a requirement"""
         esig_required, esig_category = self._detect_esig(description)
 
         if not priority:
             priority = self._extract_priority(description)
+
+        inferred_module: str = module if module else self._infer_module(description)
 
         req_id = self._generate_id(req_type)
 
@@ -306,6 +521,7 @@ class RequirementsParser:
             type=req_type,
             description=description,
             priority=priority,
+            module=inferred_module,
             source_file=source_file,
             source_line=source_line,
             esig_required=esig_required,

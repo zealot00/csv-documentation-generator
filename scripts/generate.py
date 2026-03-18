@@ -15,7 +15,11 @@ import sys
 import os
 import subprocess
 import venv
+import json
+import shutil
 from pathlib import Path
+from datetime import datetime
+from typing import Dict, List, Any, Optional
 
 # Add scripts directory to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -24,6 +28,7 @@ from config import Config, get_gamp_category_description
 from template_loader import TemplateLoader
 from word_generator import WordGenerator
 from excel_generator import ExcelGenerator
+from requirements.parser import STANDARD_MODULES
 
 
 def get_skill_root():
@@ -245,6 +250,12 @@ Examples:
         help="Critical functions (comma-separated)",
     )
 
+    parser.add_argument(
+        "--sync",
+        action="store_true",
+        help="Sync requirements from requirements.json to template before generating",
+    )
+
     return parser.parse_args()
 
 
@@ -274,7 +285,21 @@ def generate_document(doc_type: str, config: Config):
         if fmt == "xlsx":
             # Excel generation
             excel_gen = ExcelGenerator(config.output)
-            output_file = excel_gen.generate(doc_type=doc_type, variables=variables)
+
+            # Load requirements database for RTM
+            db = None
+            if doc_type == "rtm":
+                db_path = Path(config.output).parent / "requirements.json"
+                if db_path.exists():
+                    try:
+                        with open(db_path, "r", encoding="utf-8") as f:
+                            db = json.load(f)
+                    except Exception:
+                        pass
+
+            output_file = excel_gen.generate(
+                doc_type=doc_type, variables=variables, db=db
+            )
             output_files.append(output_file)
             print(f"Generated: {output_file}")
         else:
@@ -334,6 +359,181 @@ def generate_all(config: Config):
     return all_files
 
 
+def sync_requirements_to_template(
+    doc_type: str, project_path: Optional[Path] = None
+) -> bool:
+    """Sync requirements from requirements.json to template
+
+    Returns True if sync was performed, False otherwise.
+    """
+    if doc_type not in ["urs"]:
+        return False
+
+    if project_path is None:
+        project_path = Path.cwd()
+
+    db_path = project_path / "requirements.json"
+    if not db_path.exists():
+        print("  No requirements.json found, skipping sync")
+        return False
+
+    try:
+        with open(db_path, "r", encoding="utf-8") as f:
+            db = json.load(f)
+    except Exception as e:
+        print(f"  Error reading requirements.json: {e}")
+        return False
+
+    requirements = db.get("requirements", [])
+    if not requirements:
+        print("  No requirements found, skipping sync")
+        return False
+
+    # Group requirements by module
+    by_module: Dict[str, List[Dict]] = {}
+    for req in requirements:
+        module = req.get("module", "business_func")
+        if module not in by_module:
+            by_module[module] = []
+        by_module[module].append(req)
+
+    # Get template path
+    skill_root = get_skill_root()
+    template_path = skill_root / "templates" / f"{doc_type}.md"
+
+    if not template_path.exists():
+        print(f"  Template not found: {template_path}, skipping sync")
+        return False
+
+    # Backup template
+    backup_path = template_path.with_suffix(
+        f".md.backup.{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    )
+    shutil.copy2(template_path, backup_path)
+    print(f"  Backed up template to: {backup_path.name}")
+
+    # Read template
+    with open(template_path, "r", encoding="utf-8") as f:
+        template_content = f.read()
+
+    # Check which modules need to be added
+    modules_added = []
+
+    # Iterate over all modules found in requirements.json
+    for module_id, requirements_list in by_module.items():
+        # Get module info (use STANDARD_MODULES if available, otherwise generate)
+        if module_id in STANDARD_MODULES:
+            module_info = STANDARD_MODULES[module_id]
+        else:
+            # Create info for custom module
+            module_info = {
+                "name": f"{module_id} / {module_id.replace('_', ' ').title()}",
+                "prefix": module_id[:3].upper(),
+            }
+
+        # Check if section already exists in template
+        # Look for patterns like "### 4.X Module Name" or "### 4.X 模块名"
+        section_found = False
+        for section_num in range(1, 20):
+            section_patterns = [
+                f"### 4.{section_num} ",
+                f"### {section_num} ",
+            ]
+            for pattern in section_patterns:
+                if pattern in template_content:
+                    # Check if this is our module
+                    module_name_cn = module_info["name"].split(" / ")[0]
+                    if (
+                        module_name_cn
+                        in template_content.split(pattern)[1].split("\n")[0]
+                    ):
+                        section_found = True
+                        break
+            if section_found:
+                break
+
+        if section_found:
+            print(f"  Module {module_id} section already exists, skipping")
+            continue
+
+        module_name = module_info["name"]
+        module_prefix = module_info.get("prefix", module_id[:3].upper())
+        reqs_list = by_module[module_id]
+
+        # Generate new section
+        new_section = _generate_module_section(
+            module_id, module_name, module_prefix, reqs_list
+        )
+
+        # Find insertion point (before "## 5. 非功能需求" or similar)
+        insert_marker = "## 5. 非功能需求"
+        if insert_marker in template_content:
+            template_content = template_content.replace(
+                insert_marker, new_section + "\n\n" + insert_marker
+            )
+            modules_added.append(module_id)
+            print(
+                f"  Added section for module: {module_id} ({len(reqs_list)} requirements)"
+            )
+        else:
+            # Append at end of functional requirements area
+            template_content += "\n\n" + new_section
+            modules_added.append(module_id)
+            print(f"  Appended section for module: {module_id}")
+
+    if modules_added:
+        # Write updated template
+        with open(template_path, "w", encoding="utf-8") as f:
+            f.write(template_content)
+        print(f"  Template updated with {len(modules_added)} new module sections")
+        return True
+    else:
+        print("  No new modules to add")
+        return False
+
+
+def _get_module_section_number(module_id: str) -> str:
+    """Get the section number for a module"""
+    section_map = {
+        "user_mgmt": "1",
+        "audit_trail": "2",
+        "data_mgmt": "3",
+        "business_func": "4",
+        "reporting": "5",
+        "integration": "6",
+    }
+    return section_map.get(module_id, "4")
+
+
+def _generate_module_section(
+    module_id: str, module_name: str, module_prefix: str, requirements: List[Dict]
+) -> str:
+    """Generate a markdown section for a module with its requirements"""
+    # Split module name to get Chinese and English parts
+    name_parts = module_name.split(" / ")
+    cn_name = name_parts[0] if len(name_parts) > 0 else module_id
+    en_name = name_parts[1].split("(")[0].strip() if len(name_parts) > 1 else module_id
+
+    # Determine section number
+    section_num = _get_module_section_number(module_id)
+
+    lines = [
+        f"### 4.{section_num} {cn_name} / {en_name}",
+        "",
+        f"| ID | 需求描述 / Requirement Description | 优先级 / Priority | 验证方法 / Verification |",
+        f"|----|-----------------------------------|------------------|----------------------|",
+    ]
+
+    for req in requirements:
+        req_id = req.get("id", f"URS-{module_prefix}-XXX")
+        desc = req.get("description", "")
+        priority = req.get("priority", "[应该]")
+
+        lines.append(f"| {req_id} | {desc} | {priority} | 测试 / Test |")
+
+    return "\n".join(lines)
+
+
 def main():
     """Main entry point"""
 
@@ -368,6 +568,14 @@ def main():
 
     print(f"CSV Documentation Generator")
     print(f"{'=' * 50}")
+
+    # Sync requirements to template if --sync is specified
+    if args.sync and args.doc_type == "urs":
+        print("\n[Sync] Checking requirements.json for new modules...")
+        project_path = (
+            Path(args.output).parent if args.output != "./output" else Path.cwd()
+        )
+        sync_requirements_to_template(args.doc_type, project_path)
 
     # Generate documents
     if args.doc_type == "all":
