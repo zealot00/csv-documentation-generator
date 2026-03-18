@@ -13,6 +13,8 @@ Usage:
 import argparse
 import sys
 import os
+import subprocess
+import venv
 from pathlib import Path
 
 # Add scripts directory to path
@@ -22,6 +24,141 @@ from config import Config, get_gamp_category_description
 from template_loader import TemplateLoader
 from word_generator import WordGenerator
 from excel_generator import ExcelGenerator
+
+
+def get_skill_root():
+    """Get the skill root directory"""
+    return Path(__file__).parent.parent
+
+
+def is_in_venv():
+    """Check if running in a virtual environment"""
+    return hasattr(sys, "real_prefix") or (
+        hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix
+    )
+
+
+def ensure_venv():
+    """Ensure virtual environment exists and is activated"""
+    skill_root = get_skill_root()
+    venv_path = skill_root / ".venv"
+    venv_python = venv_path / "bin" / "python"
+
+    # Check if venv already exists
+    if venv_path.exists() and venv_python.exists():
+        return str(venv_path)
+
+    print("\n" + "=" * 60)
+    print("Setting up virtual environment...")
+    print("=" * 60)
+
+    # Create venv
+    venv.create(skill_root / ".venv", with_pip=True)
+
+    # Install dependencies
+    print("\nInstalling dependencies...")
+    pip_path = venv_path / "bin" / "pip"
+
+    try:
+        subprocess.run(
+            [str(pip_path), "install", "-r", "requirements.txt"],
+            cwd=skill_root,
+            check=True,
+        )
+        print("Dependencies installed successfully!")
+    except subprocess.CalledProcessError as e:
+        print(f"Warning: Failed to install dependencies: {e}")
+        print("You may need to install them manually:")
+        print(f"  cd {skill_root}")
+        print(f"  source {venv_path}/bin/activate")
+        print(f"  pip install -r requirements.txt")
+
+    return str(venv_path)
+
+
+def get_python_executable():
+    """Get the appropriate Python executable"""
+    skill_root = get_skill_root()
+    venv_python = skill_root / ".venv" / "bin" / "python"
+
+    if venv_python.exists():
+        return str(venv_python)
+
+    # Fallback to system python
+    return sys.executable
+
+
+def prompt_gamp_category() -> int:
+    """Prompt user to select GAMP category with bilingual guidance"""
+
+    print("\n" + "=" * 60)
+    print("GAMP 5 (Second Edition) Category Selection / GAMP 5 分类选择")
+    print("=" * 60)
+
+    categories = {
+        1: {
+            "name": "Infrastructure Software",
+            "name_cn": "基础设施软件",
+            "examples": "Operating systems, databases, middleware",
+            "examples_cn": "操作系统、数据库、中间件",
+            "approach": "Limited verification",
+            "approach_cn": "有限验证",
+        },
+        2: {
+            "name": "Firmware",
+            "name_cn": "固件",
+            "examples": "Firmware in industrial controllers",
+            "examples_cn": "工业控制器中的固件",
+            "approach": "Simplified approach",
+            "approach_cn": "简化方法",
+        },
+        3: {
+            "name": "Commercial Off-The-Shelf (COTS) - Non-configured",
+            "name_cn": "商用现货软件 (不可配置)",
+            "examples": "Standard software used as-is, no configuration",
+            "examples_cn": "直接使用的标准软件，无配置",
+            "approach": "Risk-based verification",
+            "approach_cn": "基于风险的验证",
+        },
+        4: {
+            "name": "Configured COTS",
+            "name_cn": "配置型 COTS 软件",
+            "examples": "EDC, CTMS, LIMS, MES configured for specific use",
+            "examples_cn": "为特定用途配置的 EDC、CTMS、LIMS、MES",
+            "approach": "Risk-based verification with focus on configuration",
+            "approach_cn": "重点关注配置的基于风险验证",
+        },
+        5: {
+            "name": "Custom / Critical Application",
+            "name_cn": "定制/关键应用",
+            "examples": "Custom-built systems, critical systems with patient impact",
+            "examples_cn": "定制开发系统、影响患者的关键系统",
+            "approach": "Full lifecycle validation",
+            "approach_cn": "完整生命周期验证",
+        },
+    }
+
+    print("\nPlease select the GAMP category for your system:")
+    print("请为您的系统选择 GAMP 分类:\n")
+
+    for cat_id, info in categories.items():
+        print(f"  [{cat_id}] {info['name']} / {info['name_cn']}")
+        print(f"       Examples / 示例: {info['examples']} / {info['examples_cn']}")
+        print(f"       Approach / 方法: {info['approach']} / {info['approach_cn']}")
+        print()
+
+    while True:
+        try:
+            choice = input("Enter category number (1-5) / 输入分类编号 (1-5): ").strip()
+            if choice in ["1", "2", "3", "4", "5"]:
+                return int(choice)
+            else:
+                print(
+                    "Invalid input. Please enter 1, 2, 3, 4, or 5 / 无效输入，请输入 1, 2, 3, 4 或 5"
+                )
+        except (KeyboardInterrupt, EOFError):
+            print("\nUsing default category 4 / 使用默认分类 4")
+            return 4
 
 
 def parse_args():
@@ -69,9 +206,9 @@ Examples:
         "--category",
         "-c",
         type=int,
-        default=4,
+        default=None,
         choices=[1, 2, 3, 4, 5],
-        help="GAMP category (1-5)",
+        help="GAMP category (1-5). If not specified, interactive selection will be prompted.",
     )
 
     parser.add_argument(
@@ -199,7 +336,16 @@ def generate_all(config: Config):
 
 def main():
     """Main entry point"""
+
+    # Ensure virtual environment
+    if not is_in_venv():
+        ensure_venv()
+
     args = parse_args()
+
+    # Prompt for GAMP category if not specified
+    if args.category is None:
+        args.category = prompt_gamp_category()
 
     # Create output directory
     Path(args.output).mkdir(parents=True, exist_ok=True)

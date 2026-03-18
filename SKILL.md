@@ -35,18 +35,42 @@ Use this skill when:
 # Navigate to skill directory
 cd ~/Code/skills/csv-documentation-generator
 
-# Install dependencies
-pip install -r requirements.txt
+# Run script - will automatically create virtual environment on first run
+python3 scripts/generate.py vp --project "XX系统" --system "EDC v1.0" --output ./output/
 
-# Generate Validation Plan
+# Note: If --category is not specified, interactive GAMP category selection will be prompted
+# The script provides bilingual (Chinese/English) guidance based on GAMP 5 Second Edition
+
+# Generate Validation Plan (with category specified)
 python3 scripts/generate.py vp --project "XX系统" --system "EDC v1.0" --category 4 --output ./output/
-
-# Generate URS with bilingual support
-python3 scripts/generate.py urs --system "CTMS" --bilingual true --output ./output/
 
 # Generate full validation package
 python3 scripts/generate.py all --project "XX系统" --system "MES" --category 4 --output ./validation/
 ```
+
+### Auto Environment Setup
+
+This skill automatically handles environment setup:
+1. **First run**: Automatically creates `.venv` virtual environment in skill directory
+2. **Dependencies**: Automatically installs required packages (python-docx, openpyxl, etc.)
+3. **Subsequent runs**: Use the already-created virtual environment
+
+This ensures consistent behavior and avoids dependency conflicts.
+
+### Interactive GAMP Category Selection
+
+If `--category` is not specified, the script will prompt with bilingual (Chinese/English) guidance:
+
+```
+GAMP 5 (Second Edition) Category Selection:
+  [1] Infrastructure Software - 基础设施软件
+  [2] Firmware - 固件
+  [3] Commercial Off-The-Shelf (COTS) - Non-configured - 商用现货软件 (不可配置)
+  [4] Configured COTS - 配置型 COTS 软件 (e.g., EDC, CTMS, LIMS, MES)
+  [5] Custom / Critical Application - 定制/关键应用
+```
+
+AI agents should guide users to select the appropriate category based on GAMP 5 Second Edition principles.
 
 ## Available Commands
 
@@ -72,7 +96,7 @@ python3 scripts/generate.py all --project "XX系统" --system "MES" --category 4
 |--------|-------------|----------|
 | `--project` | Project name | Yes |
 | `--system` | System name and version | Yes |
-| `--category` | GAMP category (1-5) | Yes |
+| `--category` | GAMP category (1-5). If not specified, interactive selection will be prompted with bilingual GAMP 5 guidance. | No (will prompt) |
 | `--bilingual` | Generate bilingual templates (default: true) | No |
 | `--output` | Output directory | Yes |
 | `--format` | Output format: docx, xlsx, or both (default: both) | No |

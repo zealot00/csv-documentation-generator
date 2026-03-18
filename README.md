@@ -39,8 +39,19 @@ Cursor 支持加载外部 skills。请将本目录链接或复制到 Cursor 的 
 
 1. **理解用户需求** - 系统类型、文档类型、项目信息
 2. **调用生成脚本** - 使用 `scripts/generate.py`
-3. **填充参数** - 根据用户输入设置项目名、系统名、分类等
+3. **等待用户确认 GAMP 分类** - 如果用户未指定分类，脚本会显示交互式提示（包含 GAMP 5 分类说明）
+4. **填充参数** - 根据用户输入设置项目名、系统名等
 
+```
+用户: 帮我生成 CTMS 系统的验证计划
+AI: 正在使用 CSV Documentation Skill 生成验证计划...
+     
+     注意: 系统会提示选择 GAMP 分类，请根据以下指导选择:
+     - Category 3: 商用现货软件（不可配置）
+     - Category 4: 配置型 COTS 软件（如 EDC、CTMS、LIMS）
+     - Category 5: 定制开发的关键应用
+     
+     调用: python3 scripts/generate.py vp --project "XX项目" --system "CTMS v2.0" --output ./validation/
 ```
 用户: 帮我生成 CTMS 系统的验证计划
 AI: 正在使用 CSV Documentation Skill 生成验证计划...
@@ -70,43 +81,25 @@ AI: 正在使用 CSV Documentation Skill 生成验证计划...
 
 ## 快速开始
 
-### 安装
+### 自动环境配置
 
-```bash
-# 克隆或下载本工具
-cd ~/Code/skills/csv-documentation-generator
+本工具会自动检测并创建虚拟环境，无需手动配置：
 
-# 安装 Python 依赖
-pip install -r requirements.txt
-
-# 验证安装
-python3 scripts/generate.py --help
-```
+1. 首次运行时会自动在 skill 目录创建 `.venv` 虚拟环境
+2. 自动安装依赖 (`python-docx`, `openpyxl`, 等)
+3. 之后的运行会直接使用已创建的虚拟环境
 
 ### 基本用法
 
 ```bash
-# 生成验证计划 (Validation Plan)
-python3 scripts/generate.py vp \
-  --project "XX临床系统" \
-  --system "EDC v1.0" \
-  --category 4 \
-  --output ./output/
+# 进入 skill 目录
+cd ~/Code/skills/csv-documentation-generator
 
-# 生成用户需求规格 (URS)
-python3 scripts/generate.py urs \
-  --project "XX临床系统" \
-  --system "CTMS v2.0" \
-  --category 4 \
-  --bilingual true \
-  --output ./output/
+# 运行脚本 - 首次会自动创建虚拟环境
+python3 scripts/generate.py vp --project "XX临床系统" --system "EDC v1.0" --output ./output/
 
-# 生成完整验证包
-python3 scripts/generate.py all \
-  --project "XX系统" \
-  --system "MES v1.0" \
-  --category 4 \
-  --output ./validation/
+# 注意: 如果不指定 --category，会提示选择 GAMP 分类
+python3 scripts/generate.py vp --project "XX临床系统" --system "EDC v1.0" --category 4 --output ./output/
 ```
 
 ## 命令参考
