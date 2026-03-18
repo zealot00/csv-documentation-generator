@@ -1,8 +1,9 @@
-# CSV Documentation Generator v1.0
+# CSV Documentation Generator v1.1.1
 
-[![Version](https://img.shields.io/badge/version-1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](CHANGELOG.md)
 [![GAMP 5](https://img.shields.io/badge/GAMP-5%20Second%20Edition-green.svg)](references/gamp-5.md)
 [![21 CFR Part 11](https://img.shields.io/badge/21%20CFR%20Part%2011-Compliant-orange.svg)](references/21cfr-part11.md)
+[![Status](https://img.shields.io/badge/status-beta-yellow.svg)]
 
 Automated documentation generator for Computerized System Validation (CSV). Supports bilingual Chinese/English templates, designed for pharmaceutical and medical device industry validation documentation.
 
@@ -40,7 +41,7 @@ Cursor supports loading external skills. Link or copy this directory to Cursor's
 
 Ensure the skill directory is in the AI's search path. AI can be triggered by:
 
-> **Trigger Keywords**: validation plan, URS, FS, IQ, OQ, PQ, risk assessment, GAMP, 21 CFR Part 11, etc.
+> **Trigger Keywords**: validation plan, URS, FS, IQ, OQ, PQ, risk assessment, GAMP, GxP, 21 CFR Part 11, electronic signature, electronic record, EDC, CTMS, eTMF, LIMS, medical device, etc.
 
 ### AI Usage Example
 
@@ -73,6 +74,7 @@ This tool provides 12 validation document templates supporting:
 - **GAMP 5** validation strategy
 - **21 CFR Part 11** compliance
 - **ALCOA+** data integrity principles
+- **Requirements Traceability** - Code comment auto-parsing, complete URS/FS/TS/Test case traceability chain
 
 ## Supported System Types
 
