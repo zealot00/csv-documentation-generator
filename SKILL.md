@@ -21,9 +21,14 @@ category: gxp-compliance
 version: "1.1.0"
 author: zealot00
 homepage: https://github.com/zealot00/csv-documentation-generator
+repository: https://github.com/zealot00/csv-documentation-generator
+bugs: https://github.com/zealot00/csv-documentation-generator/issues
 createdAt: "2026-03-18"
 lastReviewedAt: "2026-03-18"
-validationStatus: "validated"
+validationStatus: "beta"
+compatibility:
+  openclaw: ">=1.0.0"
+  python: ">=3.10"
 requiredTools:
   - exec
   - write
@@ -108,6 +113,19 @@ python3 scripts/generate.py vp --project "XX系统" --system "EDC v1.0" --catego
 
 # Generate full validation package
 python3 scripts/generate.py all --project "XX系统" --system "MES" --category 4 --output ./validation/
+```
+
+### Parse Requirements from Code (pre-generation)
+
+```bash
+# Navigate to skill directory
+cd <SKILL_DIR>/csv-documentation-generator
+
+# Parse source code for requirements (extracts @URS, @TEST, @FS, @TS markers)
+python3 scripts/cli.py parse ./src
+
+# Review extracted requirements
+cat requirements.json
 ```
 
 ### Auto Environment Setup
