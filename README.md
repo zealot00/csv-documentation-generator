@@ -1,8 +1,9 @@
-# CSV 文档生成器 (CSV Documentation Generator) v1.0
+# CSV 文档生成器 (CSV Documentation Generator) v1.1.1
 
-[![Version](https://img.shields.io/badge/version-1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](CHANGELOG.md)
 [![GAMP 5](https://img.shields.io/badge/GAMP-5%20Second%20Edition-green.svg)](references/gamp-5.md)
 [![21 CFR Part 11](https://img.shields.io/badge/21%20CFR%20Part%2011-Compliant-orange.svg)](references/21cfr-part11.md)
+[![Status](https://img.shields.io/badge/status-beta-yellow.svg)]
 
 计算机化系统验证 (Computerized System Validation, CSV) 文档自动生成工具。支持中英双语模板，适用于制药、医疗器械行业的验证文档编制。
 
@@ -39,7 +40,7 @@ Cursor 支持加载外部 skills。请将本目录链接或复制到 Cursor 的 
 确保 skill 目录在 AI 的搜索路径中。AI 可以通过以下方式触发使用：
 
 > **触发条件**: 用户请求生成计算机化系统验证 (CSV) 文档时  
-> **关键词**: 验证计划、URS、FS、IQ、OQ、PQ、风险评估、GAMP、21 CFR Part 11 等
+> **关键词**: 验证计划、URS、FS、IQ、OQ、PQ、风险评估、GAMP、GxP、21 CFR Part 11、电子签名、电子记录、EDC、CTMS、eTMF、LIMS、医疗器械等
 
 ### AI 使用示例
 
@@ -74,6 +75,7 @@ AI: 正在使用 CSV Documentation Skill 生成验证计划...
 - **GAMP 5** 分类验证策略
 - **21 CFR Part 11** 合规检查
 - **ALCOA+** 数据完整性原则
+- **需求追溯** (Requirements Traceability) - 支持代码注释自动解析、URS/FS/TS/测试用例完整追溯链
 
 ## 支持的系统类型
 
