@@ -281,9 +281,11 @@ python3 scripts/generate.py all --sync \
 ### Parsing Requirements from Code
 
 ```bash
-# Parse source code for requirements
-cd /path/to/your/project
-python3 /path/to/skills/csv-documentation-generator/scripts/generate.py parse ./src
+# Navigate to skill directory
+cd ~/Code/skills/csv-documentation-generator
+
+# Parse source code for requirements using csv-docs CLI
+python3 scripts/cli.py parse ./src
 
 # View extracted requirements
 cat requirements.json
