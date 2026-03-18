@@ -4,6 +4,25 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.1.0] - 2026-03-18
+
+### Added
+
+#### 需求追溯系统 (Requirements Traceability)
+- **数据模型增强**: Requirement 类新增 module、fs_ref、ts_ref、test_cases 字段
+- **模块化分组**: 支持 8 种标准模块 (user_mgmt, audit_trail, data_mgmt, business_func, reporting, integration, security, compliance)
+- **AI 注释解析**: 支持 `@URS[module]` 格式的注释标记，方便 AI Agent 生成代码时自动追溯
+- **模板同步功能**: `--sync` 选项自动将 requirements.json 中的需求同步到模板章节
+- **RTM 自动生成**: 从 requirements.json 自动生成 14 列追溯矩阵 Excel
+- **测试结果关联**: 自动将测试结果关联到对应需求并更新状态
+
+#### SKILL.md 更新
+- 新增 Requirements Traceability 章节
+- 代码注释规范 (AI Agent 必须遵循)
+- 标准模块定义表
+- Test Case ID 格式说明
+- Auto-Sync 功能使用说明
+
 ## [1.0.1] - 2026-03-18
 
 ### Fixed

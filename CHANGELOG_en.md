@@ -2,6 +2,25 @@
 
 All notable version updates are documented here.
 
+## [1.1.0] - 2026-03-18
+
+### Added
+
+#### Requirements Traceability System
+- **Data model enhancement**: Requirement class added module, fs_ref, ts_ref, test_cases fields
+- **Module grouping**: Support for 8 standard modules (user_mgmt, audit_trail, data_mgmt, business_func, reporting, integration, security, compliance)
+- **AI comment parsing**: Support for `@URS[module]` format comment markers, enabling automatic traceability when AI agents generate code
+- **Template sync feature**: `--sync` option automatically syncs requirements from requirements.json to template sections
+- **RTM auto-generation**: Generate 14-column traceability matrix Excel from requirements.json
+- **Test result linking**: Automatically link test results to requirements and update status
+
+#### SKILL.md Updates
+- Added Requirements Traceability section
+- Code comment standards (AI agents must follow)
+- Standard modules definition table
+- Test Case ID format specification
+- Auto-Sync feature usage instructions
+
 ## [1.0.1] - 2026-03-18
 
 ### Fixed
