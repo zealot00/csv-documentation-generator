@@ -2,6 +2,19 @@
 
 All notable version updates are documented here.
 
+## [1.1.1] - 2026-03-18
+
+### Added
+
+#### SKILL.md Standardization
+- **Frontmatter enhancement**: Added complete YAML frontmatter structure
+- **Extended triggers**: Added GxP, 21 CFR Part 11, electronic signature, electronic record, EDC, CTMS, eTMF, LIMS, medical device triggers
+- **inputSchema definition**: Standardized input parameter structure
+- **outputSchema definition**: Standardized output document format
+- **Metadata completion**: version, author, createdAt, validationStatus fields
+- **requiredTools declaration**: Explicit exec tool permission requirement
+- **Path fix**: Use `<SKILL_DIR>` placeholder instead of hardcoded paths
+
 ## [1.1.0] - 2026-03-18
 
 ### Added

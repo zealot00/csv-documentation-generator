@@ -1,6 +1,67 @@
 ---
 name: csv-documentation-generator
 description: Use when generating computer system validation (CSV) documentation for pharmaceutical and medical device industries, including validation plans, URS, FS, IQ/OQ/PQ documents, and traceability matrices.
+triggers:
+  - "Generate CSV documentation"
+  - "创建 GMP 验证文档"
+  - "计算机化系统验证"
+  - "IQ OQ PQ protocol"
+  - "URS FS RA 追溯矩阵"
+  - "GAMP 5 validation"
+  - "GxP"
+  - "21 CFR Part 11"
+  - "电子签名"
+  - "电子记录"
+  - "EDC"
+  - "CTMS"
+  - "eTMF"
+  - "LIMS"
+  - "医疗器械"
+category: gxp-compliance
+version: "1.1.0"
+author: zealot00
+homepage: https://github.com/zealot00/csv-documentation-generator
+createdAt: "2026-03-18"
+lastReviewedAt: "2026-03-18"
+validationStatus: "validated"
+requiredTools:
+  - exec
+inputSchema:
+  type: object
+  required: [project, system]
+  properties:
+    docType:
+      type: string
+      enum: [vp, urs, fs, ra, iq, oq, pq, rtm, vsr, checklist, test-case, all]
+    project:
+      type: string
+      description: "项目名称 / Project name"
+    system:
+      type: string
+      description: "系统名称及版本 / System name and version"
+    category:
+      type: integer
+      enum: [1, 2, 3, 4, 5]
+      description: "GAMP category (1-5)"
+    bilingual:
+      type: boolean
+      default: true
+    output:
+      type: string
+      default: "./output"
+outputSchema:
+  type: object
+  properties:
+    docx:
+      type: array
+      items:
+        type: string
+      description: "Generated Word documents"
+    xlsx:
+      type: array
+      items:
+        type: string
+      description: "Generated Excel documents"
 ---
 
 # CSV Documentation Generator
@@ -33,7 +94,7 @@ Use this skill when:
 
 ```bash
 # Navigate to skill directory
-cd ~/Code/skills/csv-documentation-generator
+cd <SKILL_DIR>/csv-documentation-generator
 
 # Run script - will automatically create virtual environment on first run
 python3 scripts/generate.py vp --project "XX系统" --system "EDC v1.0" --output ./output/
@@ -282,7 +343,7 @@ python3 scripts/generate.py all --sync \
 
 ```bash
 # Navigate to skill directory
-cd ~/Code/skills/csv-documentation-generator
+cd <SKILL_DIR>/csv-documentation-generator
 
 # Parse source code for requirements using csv-docs CLI
 python3 scripts/cli.py parse ./src

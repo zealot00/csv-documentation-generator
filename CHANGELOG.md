@@ -4,6 +4,19 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.1.1] - 2026-03-18
+
+### Added
+
+#### SKILL.md 规范化
+- **Frontmatter 增强**: 添加完整 YAML frontmatter 结构
+- **triggers 扩展**: 新增 GxP、21 CFR Part 11、电子签名、电子记录、EDC、CTMS、eTMF、LIMS、医疗器械等触发词
+- **inputSchema 定义**: 规范化输入参数结构
+- **outputSchema 定义**: 规范化输出文档格式
+- **元数据完善**: version、author、createdAt、validationStatus 等字段
+- **requiredTools 声明**: 明确需要 exec 工具权限
+- **路径修复**: 使用 `<SKILL_DIR>` 占位符替代硬编码路径
+
 ## [1.1.0] - 2026-03-18
 
 ### Added
