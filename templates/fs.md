@@ -56,8 +56,8 @@ This document defines the functional specifications for {SYSTEM_NAME}, describin
 
 | ID | 需求 / Requirement | 优先级 / Priority |
 |----|-------------------|------------------|
-| FS-001 | | 必须 / Must |
-| FS-002 | | 应该 / Should |
+| FS-001 | | [必须] |
+| FS-002 | | [应该] |
 
 #### 4.1.4 边界条件 / Boundary Conditions
 
@@ -99,8 +99,8 @@ This document defines the functional specifications for {SYSTEM_NAME}, describin
 
 | 规则 / Rule | 描述 / Description | 优先级 / Priority |
 |------------|-------------------|------------------|
-| BR-001 | | 必须 |
-| BR-002 | | 应该 |
+| BR-001 | | [必须] |
+| BR-002 | | [应该] |
 
 ## 8. 错误处理 / Error Handling
 
