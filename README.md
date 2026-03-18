@@ -285,7 +285,7 @@ csv-documentation-generator/
 
 **解决**:
 ```bash
-pip install python-docx openpyxl
+pip install -r requirements.txt
 ```
 
 ### 问题 2: 编码错误

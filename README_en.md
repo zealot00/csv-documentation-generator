@@ -309,7 +309,7 @@ csv-docs audit
 
 **Solution**:
 ```bash
-pip install python-docx openpyxl
+pip install -r requirements.txt
 ```
 
 ### Q2: Encoding errors

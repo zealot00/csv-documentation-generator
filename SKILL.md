@@ -184,7 +184,7 @@ Tables use dual-language headers:
 
 | Issue | Solution |
 |-------|----------|
-| python-docx not installed | Run: `pip install python-docx openpyxl` |
+| python-docx not installed | Run: `pip install -r requirements.txt` |
 | Encoding errors | Ensure UTF-8 encoding in your terminal |
 | Template not found | Check you are in the correct directory |
 
