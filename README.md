@@ -2,6 +2,51 @@
 
 计算机化系统验证 (Computerized System Validation, CSV) 文档自动生成工具。支持中英双语模板，适用于制药、医疗器械行业的验证文档编制。
 
+## AI Agent 安装指南
+
+本 skill 可被以下 AI Agent 系统使用：
+
+### OpenCode
+
+```bash
+# 方法1: 链接到 skills 目录
+ln -s ~/Code/skills/csv-documentation-generator ~/.agents/skills/csv-documentation-generator
+
+# 方法2: 复制到 skills 目录
+cp -r ~/Code/skills/csv-documentation-generator ~/.agents/skills/
+```
+
+### Claude Code
+
+```bash
+ln -s ~/Code/skills/csv-documentation-generator ~/.claude/skills/csv-documentation-generator
+```
+
+### Cursor
+
+Cursor 支持加载外部 skills。请将本目录链接或复制到 Cursor 的 skills 搜索路径中。
+
+### 其他 AI Agent
+
+确保 skill 目录在 AI 的搜索路径中。AI 可以通过以下方式触发使用：
+
+> **触发条件**: 用户请求生成计算机化系统验证 (CSV) 文档时  
+> **关键词**: 验证计划、URS、FS、IQ、OQ、PQ、风险评估、GAMP、21 CFR Part 11 等
+
+### AI 使用示例
+
+当用户需要生成 CSV 文档时，AI 应该：
+
+1. **理解用户需求** - 系统类型、文档类型、项目信息
+2. **调用生成脚本** - 使用 `scripts/generate.py`
+3. **填充参数** - 根据用户输入设置项目名、系统名、分类等
+
+```
+用户: 帮我生成 CTMS 系统的验证计划
+AI: 正在使用 CSV Documentation Skill 生成验证计划...
+     调用: python3 scripts/generate.py vp --project "XX项目" --system "CTMS v2.0" --category 4 --output ./validation/
+```
+
 ## 概述
 
 本工具提供 12 种验证文档模板，支持：
