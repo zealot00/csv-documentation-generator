@@ -141,6 +141,7 @@ python3 scripts/generate.py vp --project "XX临床系统" --system "EDC v1.0" --
 | `--category` | GAMP 分类 (1-5) | 是 |
 | `--bilingual` | 双语模板: 'true' 或 'false' (默认: true) | 否 |
 | `--language` | 内容语言: 'zh' (中文) 或 'en' (英文) (默认: zh) | 否 |
+| `--verbose` / `-v` | 显示详细进度信息（默认简化输出） | 否 |
 | `--output` | 输出目录 | 是 |
 | `--format` | 输出格式: docx, xlsx, both (默认: both) | 否 |
 
@@ -342,6 +343,18 @@ csv-docs agent --set interactive
 ### 非交互式运行
 
 当检测到非交互式环境（stdin 不可用）时，Skill 会自动切换到 autonomous 模式并自动添加所有需求。
+
+### AI Agent 使用示例
+
+AI agent 可使用以下命令自动解析和生成文档：
+
+```bash
+# 解析代码中的需求（自动添加）
+python3 scripts/cli.py parse ./src --auto-add
+
+# 生成所有验证文档（详细输出）
+python3 scripts/generate.py all --project "XX系统" --system "System v1.0" --category 4 --verbose
+```
 
 ## 常见问题
 

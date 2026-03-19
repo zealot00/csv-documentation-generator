@@ -140,6 +140,7 @@ python3 scripts/generate.py vp --project "Clinical System" --system "EDC v1.0" -
 | `--category` | GAMP category (1-5) | Yes |
 | `--bilingual` | Bilingual mode: 'true' or 'false' (default: true) | No |
 | `--language` | Content language: 'zh' (Chinese) or 'en' (English) (default: zh) | No |
+| `--verbose` / `-v` | Show detailed progress information (default: simplified output) | No |
 | `--output` | Output directory | Yes |
 | `--format` | Output format: docx, xlsx, both (default: both) | No |
 
@@ -406,6 +407,18 @@ csv-docs agent --set interactive
 ### Non-Interactive Execution
 
 When a non-interactive environment is detected (stdin unavailable), the skill automatically switches to autonomous mode and adds all requirements.
+
+### AI Agent Usage Example
+
+AI agents can use the following commands for automatic parsing and generation:
+
+```bash
+# Parse code for requirements (auto-add)
+python3 scripts/cli.py parse ./src --auto-add
+
+# Generate all validation documents (verbose output)
+python3 scripts/generate.py all --project "XXSystem" --system "System v1.0" --category 4 --verbose
+```
 
 ## FAQ
 

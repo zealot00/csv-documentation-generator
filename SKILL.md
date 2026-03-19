@@ -124,6 +124,9 @@ cd <SKILL_DIR>/csv-documentation-generator
 # Parse source code for requirements (extracts @URS, @TEST, @FS, @TS markers)
 python3 scripts/cli.py parse ./src
 
+# For AI agents (non-interactive mode), use --auto-add:
+python3 scripts/cli.py parse ./src --auto-add
+
 # Review extracted requirements
 cat requirements.json
 ```
@@ -179,6 +182,7 @@ AI agents should guide users to select the appropriate category based on GAMP 5 
 | `--category` | GAMP category (1-5). If not specified, interactive selection will be prompted with bilingual GAMP 5 guidance. | No (will prompt) |
 | `--bilingual` | Enable bilingual mode: 'true' or 'false' (default: true). When true, headers remain bilingual and content follows --language. | No |
 | `--language` | Primary language for content: 'zh' (Chinese) or 'en' (English) (default: zh). Used when bilingual=false or for content in bilingual mode. | No |
+| `--verbose` / `-v` | Show detailed progress information (default: simplified output) | No |
 | `--output` | Output directory | Yes |
 | `--format` | Output format: docx, xlsx, or both (default: both) | No |
 
@@ -785,6 +789,18 @@ python3 scripts/generate.py --help
 ```
 
 ## Examples
+
+### AI Agent (Non-Interactive Mode)
+
+For AI agents running in non-interactive mode, use `--auto-add` to automatically add all parsed requirements:
+
+```bash
+# Parse and auto-add all requirements (non-interactive)
+python3 scripts/cli.py parse ./src --auto-add
+
+# Generate with verbose output
+python3 scripts/generate.py all --project "XX系统" --system "System v1.0" --category 4 --verbose
+```
 
 ### Example 1: Generate URS for CTMS
 
