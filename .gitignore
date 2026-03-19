@@ -28,3 +28,7 @@ test_output/
 
 # Planning (internal only)
 plan/
+
+# Session files
+ses_*.json
+session-*.md

@@ -106,6 +106,7 @@ def cmd_parse(project_path, args, mode):
     path = Path(args.get("<path>", "./src"))
     parser = RequirementsParser(project_path)
     audit = AuditLogger(project_path)
+    auto_add = args.get("--auto-add", False)
 
     if path.is_file():
         requirements = parser.parse_file(path)
@@ -119,8 +120,8 @@ def cmd_parse(project_path, args, mode):
         print("未发现需求")
         return 0
 
-    # Show preview in interactive mode
-    if mode == "interactive":
+    # Show preview in interactive mode (unless --auto-add is specified)
+    if mode == "interactive" and not auto_add:
         print("\n发现的需求:")
         for i, req in enumerate(requirements, 1):
             print(f"\n  [{i}] {req.id}: {req.description[:60]}...")
@@ -506,8 +507,12 @@ def main():
         cmd_agent(project_path, parsed)
 
     elif cmd == "parse":
-        path = args[1] if len(args) > 1 else "./src"
-        cmd_parse(project_path, {"<path>": path}, mode)
+        filtered_args = [a for a in args if a not in ("--auto-add", "--yes")]
+        path = filtered_args[1] if len(filtered_args) > 1 else "./src"
+        parsed = {"<path>": path}
+        if "--auto-add" in args or "--yes" in args:
+            parsed["--auto-add"] = True
+        cmd_parse(project_path, parsed, mode)
 
     elif cmd == "status":
         cmd_status(project_path)

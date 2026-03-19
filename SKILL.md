@@ -466,6 +466,25 @@ def assign_role(user_id: str, role: str) -> bool:
 
 **注意**: 章节号（4.X）是动态分配的，基于模板中已有的章节。同步时会自动为新模块分配下一个可用编号。
 
+### System Prompt Integration
+
+To enable cross-skill annotation enforcement (so other skills also add @REQ markers), add the following rules to your AI agent's system prompt:
+
+```
+Code Annotation Rules (for GxP traceability):
+- When writing code that implements requirements, add @REQ markers: # @REQ URS-xxx - description
+- When writing test cases, add @TEST markers: # @TEST[OQ-UM-xxx] - description
+- Mark high-risk code sections with @RISK H (security, compliance, audit trail related)
+- Mark medium-risk code with @RISK M
+- Mark low-risk code with @RISK L
+```
+
+**Why this matters:**
+- Without system prompt integration: Only applies when this skill is active
+- With system prompt integration: Applies to ALL code generation across all skills
+
+See [`STANDARDS.md`](STANDARDS.md) for full documentation and [`standards/code-annotations.json`](standards/code-annotations.json) for the standards file.
+
 ### Test Case ID Format
 
 Test case IDs follow the format: `{IQ|OQ|PQ}-{ModulePrefix}-{Number}`
