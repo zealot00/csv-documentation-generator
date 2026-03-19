@@ -6,6 +6,24 @@
 
 ## [1.4.0] - 2026-03-19
 
+## [1.5.0] - 2026-03-19
+
+### Changed
+
+#### Skill 设计哲学重构
+- **SKILL.md 精简**: 从 1034 行精简至 784 行，移除 prompt 内容至 prompts.md
+- **Semantic Action Graph**: 新增显式的语义动作图定义，展示文档生成间的依赖关系
+- **prompts.md 新建**: 将 Critical Thinking Constraints、触发条件、填充 Prompt 迁移至独立文件
+- **SemanticActions 类**: 在 generate.py 中新增 SemanticActions 类，封装为可被 AI agent 动态调用的能力节点
+
+#### 架构变更
+- **Skill = Tool Semantic Encapsulation + Trigger Conditions**: 重构后更符合此设计哲学
+- **SKILL.md**: 现在只包含 Skill Definition + Semantic Action Graph + Execution Interface
+- **prompts.md**: 包含所有 prompt 模板和思维约束
+- **generate.py**: 作为 Execution Engine 暴露 SemanticActions 接口
+
+## [1.4.0] - 2026-03-19
+
 ### Added
 
 #### GAMP 5 Second Edition 合规增强
