@@ -2,6 +2,14 @@
 
 All notable version updates are documented here.
 
+## [1.3.2] - 2026-03-19
+
+### Fixed
+
+#### Bug Fixes
+- **Sync Module Section Fix**: `sync_bidirectional()` `to-template` branch now correctly groups requirements by module and creates corresponding section headers (`### 4.X Module Name`) instead of simply appending table rows
+- Fixed issue where custom modules (e.g., `pm_query`, `multi_lock`) couldn't create sections
+
 ## [1.3.1] - 2026-03-19
 
 ### Fixed

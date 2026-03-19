@@ -4,6 +4,14 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.3.2] - 2026-03-19
+
+### Fixed
+
+#### Bug 修复
+- **Sync 模块章节修复**: `sync_bidirectional()` 的 `to-template` 分支现在正确按模块分组需求，并为每个模块创建对应的章节标题（`### 4.X 模块名`），而不是简单追加表格行
+- 修复自定义模块（如 `pm_query`, `multi_lock` 等）无法创建章节的问题
+
 ## [1.3.1] - 2026-03-19
 
 ### Fixed

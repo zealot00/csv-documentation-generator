@@ -1174,42 +1174,78 @@ def sync_bidirectional(
         print(
             f"\n[Sync to Template] Adding {len(only_in_json)} requirements to template..."
         )
+
+        # Group requirements by module
+        by_module: Dict[str, List[Dict]] = {}
+        for req_id in only_in_json:
+            req = json_reqs[req_id]
+            module = req.get("module", "business_func")
+            by_module.setdefault(module, []).append(req)
+
+        # Backup template
         backup_path = template_path.with_suffix(
             f".md.backup.{datetime.now().strftime('%Y%m%d%H%M%S')}"
         )
         shutil.copy2(template_path, backup_path)
         print(f"  Backed up template to: {backup_path.name}")
 
-        new_lines = []
-        for req_id in sorted(only_in_json):
-            req = json_reqs[req_id]
-            desc = req.get("description", "")
-            priority = req.get("priority", "应该")
-            new_lines.append(f"| {req_id} | {desc} | {priority} |")
-            new_lines.append(f"| | | |")
+        modules_added = []
 
-        # Append new requirements before the footer
-        if new_lines:
-            footer_marker = "\n---\n"
-            if footer_marker in template_content:
-                parts = template_content.split(footer_marker)
-                template_content = (
-                    parts[0]
-                    + "\n"
-                    + "\n".join(new_lines)
-                    + footer_marker
-                    + "\n".join(parts[1].split("\n")[2:])
+        # Process each module: check if section exists, create if not
+        for module_id, reqs in by_module.items():
+            # Get module info
+            if module_id in STANDARD_MODULES:
+                module_info = STANDARD_MODULES[module_id]
+            else:
+                module_info = {
+                    "name": f"{module_id} / {module_id.replace('_', ' ').title()}",
+                    "prefix": module_id[:3].upper(),
+                }
+
+            # Check if section already exists
+            module_name_cn = module_info["name"].split(" / ")[0]
+            section_found = False
+            for section_num in range(1, 20):
+                pattern = f"### 4.{section_num} {module_name_cn}"
+                if pattern in template_content:
+                    section_found = True
+                    break
+
+            if section_found:
+                print(f"  Module {module_id} section exists, skipping")
+                continue
+
+            # Generate module section
+            new_section = _generate_module_section(
+                module_id,
+                module_info["name"],
+                module_info.get("prefix", module_id[:3].upper()),
+                reqs,
+            )
+
+            # Insert before "## 5. 非功能需求"
+            insert_marker = "## 5. 非功能需求"
+            if insert_marker in template_content:
+                template_content = template_content.replace(
+                    insert_marker, new_section + "\n\n" + insert_marker
                 )
             else:
-                template_content += "\n" + "\n".join(new_lines)
+                template_content += "\n\n" + new_section
 
-        try:
-            with open(template_path, "w", encoding="utf-8") as f:
-                f.write(template_content)
-            print(f"  Added {len(only_in_json)} requirements to template")
-            sync_performed = True
-        except Exception as e:
-            print(f"  Error writing template: {e}")
+            modules_added.append(module_id)
+            print(f"  Added section for module: {module_id} ({len(reqs)} requirements)")
+
+        # Write updated template
+        if modules_added:
+            try:
+                with open(template_path, "w", encoding="utf-8") as f:
+                    f.write(template_content)
+                print(
+                    f"  Template updated with {len(modules_added)} new module sections"
+                )
+                sync_performed = True
+            except Exception as e:
+                print(f"  Error writing template: {e}")
 
     # Handle conflicts
     if conflicts:
