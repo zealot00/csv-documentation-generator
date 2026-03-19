@@ -4,6 +4,24 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.3.0] - 2026-03-19
+
+### Added
+
+#### Phase 2 (P1) Features
+- **P1.1 Git Hooks**: `scripts/git-hooks/post-commit` 和 `install.sh`，提交后自动运行合规检查
+- **P1.2 合规检查器**: `generate.py check` 命令，支持覆盖率、高风险模块、测试覆盖率检查
+- **P1.3 增量更新**: `--diff-only` 参数，基于 SHA256 哈希跳过未变更的生成
+
+#### Phase 3 (P2) Features
+- **P2.1 双向同步**: `--sync --sync-direction {to-json|to-template|both}` 支持模板与 JSON 双向同步，带冲突检测
+- **P2.2 Monorepo 支持**: `--project-root` 参数，自动检测 `apps/`、`packages/` 等多项目结构
+- **P2.3 CI/CD 模板**: `templates/ci/github-actions.yml` 和 `gitlab-ci.yml`
+- **P2.4 模板版本管理**: 自动版本迁移和兼容性检查
+
+### Changed
+- **版本号统一**: SKILL.md、README.md、versioning.py 统一为 1.3.0
+
 ## [1.1.2] - 2026-03-18
 
 ### Fixed

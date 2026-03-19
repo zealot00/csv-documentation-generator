@@ -2,6 +2,24 @@
 
 All notable version updates are documented here.
 
+## [1.3.0] - 2026-03-19
+
+### Added
+
+#### Phase 2 (P1) Features
+- **P1.1 Git Hooks**: `scripts/git-hooks/post-commit` and `install.sh` for post-commit compliance checks
+- **P1.2 Compliance Checker**: `generate.py check` command with coverage, high-risk module, and test coverage checks
+- **P1.3 Incremental Update**: `--diff-only` parameter with SHA256 hash-based smart rebuild
+
+#### Phase 3 (P2) Features
+- **P2.1 Bidirectional Sync**: `--sync --sync-direction {to-json|to-template|both}` with conflict detection
+- **P2.2 Monorepo Support**: `--project-root` parameter, auto-detects `apps/`, `packages/` structures
+- **P2.3 CI/CD Templates**: `templates/ci/github-actions.yml` and `gitlab-ci.yml`
+- **P2.4 Template Versioning**: Automatic migration and compatibility checking
+
+### Changed
+- **Version unified**: SKILL.md, README.md, versioning.py updated to 1.3.0
+
 ## [1.1.2] - 2026-03-18
 
 ### Fixed
