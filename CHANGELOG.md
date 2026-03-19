@@ -4,6 +4,36 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.4.0] - 2026-03-19
+
+### Added
+
+#### GAMP 5 Second Edition 合规增强
+- **M12 Critical Thinking**: 添加关键思维约束（ M12.1~M12.5），指导 AI 在验证过程中进行系统性风险思考
+- **文档生成触发条件**: 新增触发条件库，定义 VP/URS/FS/RA/IQ-OQ-PQ/VSR 生成前的预填充数据
+- **内容填充 Prompt 库**: 新增 URS/FS/RA 填充 prompt 模板
+- **数据流动定义**: 新增文档间数据流动规则（VP→RA→FS→Test→VSR 自动追溯）
+
+#### 示例文件
+- **templates/examples/urs-example.md**: CTMS 系统完整 URS 示例
+- **templates/examples/fs-example.md**: FS 追溯表示例
+- **templates/examples/ra-example.md**: 分层风险评估示例
+- **templates/examples/iq-example.md**: IQ 检查项示例
+
+### Changed
+
+#### 模板精简
+- **URS.md**: 移除硬编码的 URS-001~URS-055 示例，精简为纯结构模板
+- **FS.md**: 移除硬编码的 FS-UM-*/FS-AU-* 示例，简化 4.0 追溯表
+- **RA.md**: 移除硬编码的 RA-DI-*/RA-SC-* 示例
+- **IQ.md**: 移除硬编码的 IQ-HW-*/IQ-OS-* 检查项
+- **TS.md**: 移除硬编码的技术栈示例
+- **VSR.md**: 新增 Lessons Learned 和 Periodic Review 章节
+
+#### 基础设施
+- **plan/ 目录**: 新建 plan/ 目录用于存储 gap analysis
+- **.gitignore**: 更新以排除 plan/ 目录
+
 ## [1.3.4] - 2026-03-19
 
 ### Changed

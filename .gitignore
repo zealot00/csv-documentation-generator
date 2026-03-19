@@ -25,3 +25,6 @@ output/
 test_output/
 *.docx
 *.xlsx
+
+# Planning (internal only)
+plan/
