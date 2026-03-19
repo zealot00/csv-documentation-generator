@@ -282,12 +282,15 @@ RTM (追溯矩阵自动生成)
 
 ### Code Comment Standards (AI Agent Must Follow)
 
-When generating code, **AI agents MUST include requirement markers** for automatic traceability:
+When generating code, **AI agents MUST include requirement markers** for automatic traceability. Use the standardized `@REQ` format:
 
 ```python
-# @URS[user_mgmt] 系统应支持基于角色的访问控制 (RBAC)
+# @REQ URS-001 - 系统应支持基于角色的访问控制 (RBAC)
+# @REQ URS-002 - 用户密码必须满足复杂度要求（至少8位）
 # @FS FS-001
-# @TEST[OQ-UM-001] 验证用户角色分配功能
+# @TS TS-001
+# @TEST[OQ-UM-001] - 验证用户角色分配功能
+# @RISK H  # High risk module
 
 def assign_role(user_id: str, role: str) -> bool:
     '''
@@ -297,16 +300,22 @@ def assign_role(user_id: str, role: str) -> bool:
     # Implementation...
 ```
 
-**Supported comment formats:**
+**Standard comment formats:**
 
 | Pattern | Example | Description |
 |---------|---------|-------------|
-| `// @URS[module]` | `// @URS[user_mgmt] 描述` | Requirement with module |
-| `# @URS[module]` | `# @URS[audit_trail] 描述` | Python-style comment |
-| `/* @URS[module] */` | `/* @URS[security] 描述 */` | Multi-line comment |
-| `// @TEST[type-id]` | `// @TEST[OQ-UM-001] 描述` | Test case link |
+| `// @REQ URS-xxx` | `// @REQ URS-001 - 系统应支持RBAC` | Requirement with ID and description |
+| `# @REQ` | `# @REQ URS-001 - 描述` | Python-style comment |
+| `/* @REQ */` | `/* @REQ URS-001 - 描述 */` | Multi-line comment |
+| `// @TEST[type-id]` | `// @TEST[OQ-UM-001] - 验证` | Test case link |
 | `// @FS` | `// @FS FS-001` | FS reference |
 | `// @TS` | `// @TS TS-001` | TS reference |
+| `// @RISK [H/M/L]` | `// @RISK H` | Risk level (High/Medium/Low) |
+
+**Risk levels:**
+- `H` (High): Security, compliance, electronic signature, audit trail related
+- `M` (Medium): Default for most requirements
+- `L` (Low): Simple features, documentation, reports
 
 ### Standard Modules
 

@@ -138,6 +138,7 @@ class Requirement:
     description: str
     priority: str  # 必须, 应该, 可以
     module: str = "business_func"  # default module
+    risk_level: str = "M"  # H (High), M (Medium), L (Low)
     source_file: Optional[str] = None
     source_line: Optional[int] = None
     esig_required: bool = False
@@ -164,15 +165,21 @@ class RequirementsParser:
     """Parse source code to extract requirements"""
 
     # Comment patterns for requirement markers
+    # New standardized format: @REQ URS-001 - description
     COMMENT_PATTERNS = [
-        r"@req\s+(?:(\w+-\d+)\s+)?(.+)",  # @req URS-001 description
-        r"@requirement\s+(?:(\w+-\d+)\s+)?(.+)",  # @requirement
+        r"//\s*@REQ\s+(URS-\d{3})\s*-\s*(.+)",  # // @REQ URS-001 - description
+        r"#\s*@REQ\s+(URS-\d{3})\s*-\s*(.+)",  # # @REQ URS-001 - description
+        r"/\*\s*@REQ\s+(URS-\d{3})\s*-\s*(.+?)\*/",  # /* @REQ URS-001 - description */
+        r"<!--\s*@REQ\s+(URS-\d{3})\s*-\s*(.+)-->",  # <!-- @REQ URS-001 - description -->
+        r"@req\s+(?!URS)(\w+-\d+)\s+(.+)",  # @req ABC-001 description (legacy, must not start with URS)
+        r"@requirement\s+(?!URS)(\w+-\d+)\s+(.+)",  # @requirement ABC-001 description (legacy)
         r"#\s*(\w+-\d+)[:\s]+(.+)",  # URS-001: description
         r"#\s*\[(\w+-\d+)\]\s*(.+)",  # [URS-001] description
         r"<!--\s*(\w+-\d+)\s+(.+)-->",  # HTML comment style
     ]
 
-    # AI Agent friendly patterns with module specification
+    # Legacy AI-friendly patterns (for backward compatibility)
+    # These are kept for old code that uses @URS[module] format
     AI_COMMENT_PATTERNS = [
         r"//\s*@URS\[(\w+)\]\s+(.+)",  # // @URS[user_mgmt] description
         r"#\s*@URS\[(\w+)\]\s+(.+)",  # # @URS[user_mgmt] description
@@ -182,17 +189,24 @@ class RequirementsParser:
 
     # Test case association patterns
     TEST_CASE_PATTERNS = [
-        r"//\s*@TEST\[(\w+-\w+-\d+)\]\s*(.*)",  # // @TEST[OQ-UM-001] description
-        r"#\s*@TEST\[(\w+-\w+-\d+)\]\s*(.*)",  # # @TEST[OQ-UM-001] description
-        r"/\*\s*@TEST\[(\w+-\w+-\d+)\]\s*(.*)\*/",  # /* @TEST[OQ-UM-001] description */
+        r"//\s*@TEST\[(\w+-\w+-\d+)\]\s*-\s*(.*)",  # // @TEST[OQ-UM-001] - description
+        r"#\s*@TEST\[(\w+-\w+-\d+)\]\s*-\s*(.*)",  # # @TEST[OQ-UM-001] - description
+        r"/\*\s*@TEST\[(\w+-\w+-\d+)\]\s*-\s*(.*?)\*/",  # /* @TEST[OQ-UM-001] - description */
     ]
 
     # FS/TS reference patterns
     FS_TS_PATTERNS = [
-        r"//\s*@FS\s+(FS-\d+)",  # // @FS FS-001
-        r"#\s*@FS\s+(FS-\d+)",  # # @FS FS-001
-        r"//\s*@TS\s+(TS-\d+)",  # // @TS TS-001
-        r"#\s*@TS\s+(TS-\d+)",  # # @TS TS-001
+        r"//\s*@FS\s+(FS-\d{3})",  # // @FS FS-001
+        r"#\s*@FS\s+(FS-\d{3})",  # # @FS FS-001
+        r"//\s*@TS\s+(TS-\d{3})",  # // @TS TS-001
+        r"#\s*@TS\s+(TS-\d{3})",  # # @TS TS-001
+    ]
+
+    # Risk level patterns
+    RISK_PATTERNS = [
+        r"//\s*@RISK\s+([HML])",  # // @RISK H
+        r"#\s*@RISK\s+([HML])",  # # @RISK H
+        r"/\*\s*@RISK\s+([HML])\s*/",  # /* @RISK H */
     ]
 
     # Priority keywords
@@ -343,6 +357,56 @@ class RequirementsParser:
 
         return "business_func"  # Default module
 
+    def _infer_risk_level(self, text: str) -> str:
+        """Infer risk level from text keywords"""
+        text_lower = text.lower()
+
+        # High risk keywords
+        high_risk_keywords = [
+            "安全",
+            "security",
+            "加密",
+            "encrypt",
+            "解密",
+            "decrypt",
+            "权限",
+            "permission",
+            "访问控制",
+            "access control",
+            "合规",
+            "compliance",
+            "法规",
+            "regulation",
+            "电子签名",
+            "electronic signature",
+            "e-sign",
+            "审计",
+            "audit",
+            "critical",
+        ]
+
+        # Low risk keywords
+        low_risk_keywords = [
+            "简单",
+            "simple",
+            "基础",
+            "basic",
+            "文档",
+            "documentation",
+            "报表",
+            "report",
+        ]
+
+        for keyword in high_risk_keywords:
+            if keyword.lower() in text_lower:
+                return "H"
+
+        for keyword in low_risk_keywords:
+            if keyword.lower() in text_lower:
+                return "L"
+
+        return "M"  # Default medium risk
+
     def _parse_requirement_from_match(
         self, match: re.Match, file_path: str, line_num: int
     ) -> Optional[Requirement]:
@@ -386,11 +450,19 @@ class RequirementsParser:
         # Detect eSignature requirement
         esig_required, esig_category = self._detect_esig(description)
 
+        # Infer module from description
+        module = self._infer_module(description, file_path)
+
+        # Infer risk level from description keywords
+        risk_level = self._infer_risk_level(description)
+
         return Requirement(
             id=req_id,
             type=req_type,
             description=description.strip(),
             priority=priority,
+            module=module,
+            risk_level=risk_level,
             source_file=file_path,
             source_line=line_num,
             esig_required=esig_required,
