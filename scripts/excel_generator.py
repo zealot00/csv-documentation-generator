@@ -80,7 +80,11 @@ class ExcelGenerator:
 
         # Save document
         if filename is None:
-            filename = f"{doc_type.upper()}.xlsx"
+            project_name = variables.get("PROJECT_NAME", "")
+            if project_name:
+                filename = f"RTM_{project_name}.xlsx"
+            else:
+                filename = f"{doc_type.upper()}.xlsx"
 
         output_path = self.output_dir / filename
         wb.save(str(output_path))

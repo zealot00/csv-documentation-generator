@@ -18,7 +18,7 @@ triggers:
   - "LIMS"
   - "医疗器械"
 category: gxp-compliance
-version: "1.3.0"
+version: "1.3.1"
 author: zealot00
 homepage: https://github.com/zealot00/csv-documentation-generator
 repository: https://github.com/zealot00/csv-documentation-generator

@@ -4,6 +4,14 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.3.1] - 2026-03-19
+
+### Fixed
+
+#### Bug 修复
+- **Sync 路径修复**: `sync_bidirectional()` 修复写入错误位置问题，现在正确写入项目目录的模板
+- **RTM 文件名修复**: RTM 文件名现在正确包含项目名，格式为 `RTM_{项目名}.xlsx`
+
 ## [1.3.0] - 2026-03-19
 
 ### Added
@@ -18,9 +26,6 @@
 - **P2.2 Monorepo 支持**: `--project-root` 参数，自动检测 `apps/`、`packages/` 等多项目结构
 - **P2.3 CI/CD 模板**: `templates/ci/github-actions.yml` 和 `gitlab-ci.yml`
 - **P2.4 模板版本管理**: 自动版本迁移和兼容性检查
-
-### Changed
-- **版本号统一**: SKILL.md、README.md、versioning.py 统一为 1.3.0
 
 ## [1.1.2] - 2026-03-18
 

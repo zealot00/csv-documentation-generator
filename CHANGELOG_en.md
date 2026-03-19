@@ -2,6 +2,14 @@
 
 All notable version updates are documented here.
 
+## [1.3.1] - 2026-03-19
+
+### Fixed
+
+#### Bug Fixes
+- **Sync Path Fix**: `sync_bidirectional()` now writes to project directory instead of skill directory
+- **RTM Filename Fix**: RTM filename now correctly includes project name, format `RTM_{project}.xlsx`
+
 ## [1.3.0] - 2026-03-19
 
 ### Added
@@ -16,9 +24,6 @@ All notable version updates are documented here.
 - **P2.2 Monorepo Support**: `--project-root` parameter, auto-detects `apps/`, `packages/` structures
 - **P2.3 CI/CD Templates**: `templates/ci/github-actions.yml` and `gitlab-ci.yml`
 - **P2.4 Template Versioning**: Automatic migration and compatibility checking
-
-### Changed
-- **Version unified**: SKILL.md, README.md, versioning.py updated to 1.3.0
 
 ## [1.1.2] - 2026-03-18
 

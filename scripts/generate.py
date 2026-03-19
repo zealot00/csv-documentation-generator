@@ -1054,12 +1054,20 @@ def sync_bidirectional(
         project_path = Path.cwd()
 
     db_path = find_requirements_db(project_path)
-    skill_root = get_skill_root()
-    template_path = skill_root / "templates" / f"{doc_type}.md"
 
-    if not template_path.exists():
-        print(f"  Template not found: {template_path}")
+    local_template_path = project_path / "templates" / f"{doc_type}.md"
+    skill_root = get_skill_root()
+    skill_template_path = skill_root / "templates" / f"{doc_type}.md"
+
+    if local_template_path.exists():
+        template_path = local_template_path
+    elif skill_template_path.exists():
+        template_path = skill_template_path
+    else:
+        print(f"  Template not found: {doc_type}.md")
         return False
+
+    print(f"  Using template: {template_path}")
 
     # Load database
     db = None
