@@ -243,7 +243,7 @@ csv-documentation-generator/
 ├── scripts/
 │   ├── cli.py                        # Unified CLI (csv-docs)
 │   ├── generate.py                   # Document generator
-│   ├── agent.py                      # Agent mode detection
+│   ├── agent.py                      # Agent mode detection (simplified)
 │   ├── config.py                     # Configuration management
 │   ├── word_generator.py             # Word generator
 │   ├── excel_generator.py            # Excel generator

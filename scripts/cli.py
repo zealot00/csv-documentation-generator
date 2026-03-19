@@ -86,11 +86,10 @@ def cmd_agent(project_path, args):
             print(f"错误: 无效模式 '{mode}'")
             return 1
 
-        target = args.get("target", "config")
-        success = detector.set_mode(mode, target)
+        success = detector.set_mode(mode)
 
         if success:
-            print(f"已设置模式为: {mode} (保存到 {target})")
+            print(f"已设置模式为: {mode} (保存到 .csv-docs-config.json)")
         else:
             print(f"设置失败")
             return 1
