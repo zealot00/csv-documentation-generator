@@ -2,6 +2,64 @@
 
 All notable version updates are documented here.
 
+## [1.6.0] - 2026-03-19
+
+### Added
+
+#### Smart Bilingual Mode
+- **--language parameter**: New `--language` parameter to select content language ('zh' or 'en')
+- **Intelligent bilingual processing**: `process_markdown_table_bilingual()` function that intelligently processes output based on `--bilingual` and `--language`
+
+#### Cross-Skill Code Annotation Coordination
+- **STANDARDS.md**: New standards documentation with System Prompt integration instructions
+- **standards/code-annotations.json**: Central code annotation registry supporting 15 programming languages
+- **scripts/standards_reader.py**: Standards reader tool for use by other skills
+
+#### CLI Improvements
+- **--auto-add/--yes flag**: New `--auto-add` and `--yes` flags for `cli.py parse` command for non-interactive use
+
+### Changed
+
+#### Bilingual Behavior
+- `--bilingual true` (default): Headers remain bilingual, content follows `--language`
+- `--bilingual false`: Pure single-language output, determined by `--language`
+- Users and AI agents now have full control over document language output
+
+#### Gitignore Updates
+- Added `ses_*.json` and `session-*.md` to .gitignore
+
+## [1.5.0] - 2026-03-19
+
+### Changed
+
+#### Skill Design Philosophy Refactoring
+- **SKILL.md simplification**: Reduced from 1034 to ~785 lines, moved prompt content to prompts.md
+- **Semantic Action Graph**: New explicit semantic action graph definition showing document generation dependencies
+- **prompts.md created**: Critical Thinking Constraints, triggering conditions, and fill prompts moved to separate file
+- **SemanticActions class**: New class in generate.py encapsulating dynamically callable capability nodes for AI agents
+
+#### Architecture Changes
+- **Skill = Tool Semantic Encapsulation + Trigger Conditions**: Refactored to better align with this design philosophy
+- **SKILL.md**: Now contains only Skill Definition + Semantic Action Graph + Execution Interface
+- **prompts.md**: Contains all prompt templates and thinking constraints
+- **generate.py**: Acts as Execution Engine exposing SemanticActions interface
+
+## [1.4.0] - 2026-03-19
+
+### Added
+
+#### GAMP 5 Second Edition Compliance
+- **M12 Critical Thinking**: Added critical thinking constraints (M12.1~M12.5) guiding AI through systematic risk thinking during validation
+- **Document Generation Triggering Conditions**: New trigger condition library defining pre-fill data for VP/URS/FS/RA/IQ-OQ-PQ/VSR
+- **Content Fill Prompt Library**: New URS/FS/RA fill prompt templates
+- **Data Flow Definitions**: New inter-document data flow rules (VP→RA→FS→Test→VSR automatic traceability)
+
+#### Example Files
+- **templates/examples/urs-example.md**: Complete CTMS URS example
+- **templates/examples/fs-example.md**: FS traceability example
+- **templates/examples/ra-example.md**: Hierarchical risk assessment example
+- **templates/examples/iq-example.md**: IQ check items example
+
 ## [1.3.4] - 2026-03-19
 
 ### Changed

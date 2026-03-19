@@ -1,6 +1,6 @@
-# CSV Documentation Generator v1.3.4
+# CSV Documentation Generator v1.6.0
 
-[![Version](https://img.shields.io/badge/version-1.3.4-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)](CHANGELOG.md)
 [![GAMP 5](https://img.shields.io/badge/GAMP-5%20Second%20Edition-green.svg)](references/gamp-5.md)
 [![21 CFR Part 11](https://img.shields.io/badge/21%20CFR%20Part%2011-Compliant-orange.svg)](references/21cfr-part11.md)
 [![Status](https://img.shields.io/badge/status-beta-yellow.svg)]
@@ -138,7 +138,8 @@ python3 scripts/generate.py vp --project "Clinical System" --system "EDC v1.0" -
 | `--project` | Project name | Yes |
 | `--system` | System name and version | Yes |
 | `--category` | GAMP category (1-5) | Yes |
-| `--bilingual` | Bilingual template (default: true) | No |
+| `--bilingual` | Bilingual mode: 'true' or 'false' (default: true) | No |
+| `--language` | Content language: 'zh' (Chinese) or 'en' (English) (default: zh) | No |
 | `--output` | Output directory | Yes |
 | `--format` | Output format: docx, xlsx, both (default: both) | No |
 
@@ -236,6 +237,50 @@ csv-documentation-generator/
 ├── README_en.md                      # English documentation
 ├── CHANGELOG.md                      # Chinese changelog
 ├── CHANGELOG_en.md                   # English changelog
+├── STANDARDS.md                       # Code annotation standards
+├── requirements.txt                   # Python dependencies
+├── .csv-docs-config.json             # Project config (AI Agent)
+├── requirements.json                  # Requirements database (AI Agent)
+├── audit-log.json                    # Audit log (AI Agent)
+├── scripts/
+│   ├── cli.py                        # Unified CLI (csv-docs)
+│   ├── generate.py                   # Document generator
+│   ├── agent.py                      # Agent mode detection
+│   ├── config.py                     # Configuration management
+│   ├── word_generator.py             # Word generator
+│   ├── excel_generator.py            # Excel generator
+│   ├── template_loader.py             # Template loader
+│   ├── standards_reader.py            # Standards reader
+│   ├── requirements/                 # Requirements tracking
+│   │   ├── parser.py                 # Parser + eSig detection
+│   │   ├── risk_analyzer.py          # RPN/FMEA risk assessment
+│   │   └── linker.py                 # Git commit linking
+│   ├── tests/                        # Test results
+│   │   └── parser.py                 # JUnit/pytest parser
+│   ├── fill/                         # Document filler
+│   │   └── filler.py                 # Auto-fill variables
+│   └── audit/                        # Audit log
+│       └── log.py                     # Audit log + PDF export
+├── standards/
+│   └── code-annotations.json          # Central standards registry
+├── templates/
+│   ├── vp.md, urs.md, fs.md, ts.md
+│   ├── ra.md, iq.md, oq.md, pq.md
+│   ├── vsr.md
+│   ├── test-case.xlsx
+│   └── checklist.xlsx
+└── references/
+    ├── gamp-5.md
+    ├── 21cfr-part11.md
+    ├── annex-11.md
+    └── data-integrity.md
+```
+csv-documentation-generator/
+├── SKILL.md                           # Main skill file
+├── README.md                          # Chinese documentation
+├── README_en.md                      # English documentation
+├── CHANGELOG.md                      # Chinese changelog
+├── CHANGELOG_en.md                   # English changelog
 ├── requirements.txt                   # Python dependencies
 ├── .csv-docs-config.json             # Project config (AI Agent)
 ├── requirements.json                  # Requirements database (AI Agent)
@@ -304,6 +349,28 @@ csv-docs generate vp --auto-fill
 # Show audit log
 csv-docs audit
 ```
+
+## System Prompt Integration (Cross-Skill Coordination)
+
+This skill supports **cross-skill code annotation coordination**. Add the following rules to your AI Agent's system prompt to enable automatic `@REQ` traceability markers in all code generation:
+
+```
+Code Annotation Rules (for GxP traceability):
+- When writing code that implements requirements, add @REQ markers: # @REQ URS-xxx - description
+- When writing test cases, add @TEST markers: # @TEST[OQ-UM-xxx] - description
+- Mark high-risk code sections with @RISK H (security, compliance, audit trail related)
+- Mark medium-risk code with @RISK M
+- Mark low-risk code with @RISK L
+```
+
+### Why System Prompt Integration?
+
+| Method | Effect |
+|--------|--------|
+| Only load this skill | Only this skill knows @REQ annotation rules |
+| Add to system prompt | **ALL skills will add @REQ markers when generating code** |
+
+See [`STANDARDS.md`](STANDARDS.md) for full documentation.
 
 ## FAQ
 

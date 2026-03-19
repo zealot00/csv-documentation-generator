@@ -12,12 +12,23 @@
 - **--language 参数**: 新增 `--language` 参数支持选择内容语言 ('zh' 或 'en')
 - **智能双语处理**: 实现 `process_markdown_table_bilingual()` 函数，根据 `--bilingual` 和 `--language` 智能处理输出
 
+#### 跨 Skill 代码注释协同
+- **STANDARDS.md**: 新增标准说明文档，介绍 System Prompt 集成方法
+- **standards/code-annotations.json**: 代码注释中央标准注册表，支持 15 种编程语言
+- **scripts/standards_reader.py**: 标准读取工具，可被其他 Skill 调用
+
+#### CLI 改进
+- **--auto-add/--yes flag**: `cli.py parse` 命令新增 `--auto-add` 和 `--yes` 参数，支持非交互式运行
+
 ### Changed
 
 #### 双语行为调整
 - `--bilingual true` (默认): Headers 保持双语，内容根据 `--language` 填充
 - `--bilingual false`: 纯单语输出，由 `--language` 决定语言
 - 用户和 AI agent 现在可以完全控制文档语言输出
+
+#### Gitignore 更新
+- 添加 `ses_*.json` 和 `session-*.md` 到 .gitignore
 
 ## [1.5.0] - 2026-03-19
 

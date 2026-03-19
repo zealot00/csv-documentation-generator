@@ -1,6 +1,6 @@
-# CSV 文档生成器 (CSV Documentation Generator) v1.3.4
+# CSV 文档生成器 (CSV Documentation Generator) v1.6.0
 
-[![Version](https://img.shields.io/badge/version-1.3.4-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)](CHANGELOG.md)
 [![GAMP 5](https://img.shields.io/badge/GAMP-5%20Second%20Edition-green.svg)](references/gamp-5.md)
 [![21 CFR Part 11](https://img.shields.io/badge/21%20CFR%20Part%2011-Compliant-orange.svg)](references/21cfr-part11.md)
 [![Status](https://img.shields.io/badge/status-beta-yellow.svg)]
@@ -139,7 +139,8 @@ python3 scripts/generate.py vp --project "XX临床系统" --system "EDC v1.0" --
 | `--project` | 项目名称 | 是 |
 | `--system` | 系统名称和版本 | 是 |
 | `--category` | GAMP 分类 (1-5) | 是 |
-| `--bilingual` | 双语模板 (默认: true) | 否 |
+| `--bilingual` | 双语模板: 'true' 或 'false' (默认: true) | 否 |
+| `--language` | 内容语言: 'zh' (中文) 或 'en' (英文) (默认: zh) | 否 |
 | `--output` | 输出目录 | 是 |
 | `--format` | 输出格式: docx, xlsx, both (默认: both) | 否 |
 
@@ -235,6 +236,7 @@ csv-documentation-generator/
 ├── SKILL.md                           # 主技能文件
 ├── README.md                          # 说明文档
 ├── CHANGELOG.md                       # 版本历史
+├── STANDARDS.md                        # 代码注释标准说明
 ├── requirements.txt                   # Python 依赖
 ├── .csv-docs-config.json             # 项目配置 (AI Agent)
 ├── requirements.json                  # 需求数据库 (AI Agent)
@@ -248,6 +250,7 @@ csv-documentation-generator/
 │   ├── word_generator.py             # Word 生成器
 │   ├── excel_generator.py            # Excel 生成器
 │   ├── template_loader.py            # 模板加载器
+│   ├── standards_reader.py            # 标准读取工具
 │   ├── requirements/                 # 需求追踪模块
 │   │   ├── __init__.py
 │   │   ├── parser.py                 # 需求解析 + eSig 检测
@@ -262,6 +265,8 @@ csv-documentation-generator/
 │   └── audit/                        # 审计日志模块
 │       ├── __init__.py
 │       └── log.py                    # 审计日志 + PDF 导出
+├── standards/
+│   └── code-annotations.json          # 代码注释中央标准注册表
 ├── templates/
 │   ├── vp.md                        # 验证计划模板
 │   ├── urs.md                       # 用户需求模板
@@ -280,6 +285,28 @@ csv-documentation-generator/
     ├── annex-11.md                # Annex 11 参考
     └── data-integrity.md          # 数据完整性参考
 ```
+
+## System Prompt 集成 (跨 Skill 协同)
+
+本 Skill 支持**跨 Skill 代码注释协同**。当您将以下规则添加到 AI Agent 的 system prompt 后，所有代码生成都会自动包含 `@REQ` 追溯注释：
+
+```
+Code Annotation Rules (for GxP traceability):
+- When writing code that implements requirements, add @REQ markers: # @REQ URS-xxx - description
+- When writing test cases, add @TEST markers: # @TEST[OQ-UM-xxx] - description
+- Mark high-risk code sections with @RISK H (security, compliance, audit trail related)
+- Mark medium-risk code with @RISK M
+- Mark low-risk code with @RISK L
+```
+
+### 为什么需要 System Prompt 集成？
+
+| 方式 | 效果 |
+|------|------|
+| 仅加载本 Skill | 只有本 Skill 知道 @REQ 注释规范 |
+| System Prompt 添加规则 | **所有 Skill 生成代码时都会添加 @REQ 注释** |
+
+详细说明请参阅 [`STANDARDS.md`](STANDARDS.md)。
 
 ## 常见问题
 
