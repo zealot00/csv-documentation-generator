@@ -845,7 +845,7 @@ def sync_requirements_to_template(
 
         # Generate new section
         new_section = _generate_module_section(
-            module_id, module_name, module_prefix, reqs_list
+            module_id, module_name, module_prefix, reqs_list, template_content
         )
 
         # Find insertion point (before "## 5. 非功能需求" or similar)
@@ -875,30 +875,43 @@ def sync_requirements_to_template(
         return False
 
 
-def _get_module_section_number(module_id: str) -> str:
-    """Get the section number for a module"""
-    section_map = {
-        "user_mgmt": "1",
-        "audit_trail": "2",
-        "data_mgmt": "3",
-        "business_func": "4",
-        "reporting": "5",
-        "integration": "6",
-    }
-    return section_map.get(module_id, "4")
+def _get_next_section_number(template_content: str) -> str:
+    """Calculate next available section number (4.X) in template dynamically
+
+    Scans existing 4.X section headers in template and returns the next number.
+    This ensures unique, consecutive numbering even for custom modules.
+    """
+    import re
+
+    existing = re.findall(r"### 4\.(\d+)", template_content)
+    if not existing:
+        return "1"
+    return str(max(int(n) for n in existing) + 1)
 
 
 def _generate_module_section(
-    module_id: str, module_name: str, module_prefix: str, requirements: List[Dict]
+    module_id: str,
+    module_name: str,
+    module_prefix: str,
+    requirements: List[Dict],
+    template_content: str = "",
 ) -> str:
-    """Generate a markdown section for a module with its requirements"""
-    # Split module name to get Chinese and English parts
+    """Generate a markdown section for a module with its requirements
+
+    Args:
+        module_id: Module identifier (e.g., 'pm_query', 'user_mgmt')
+        module_name: Display name (e.g., 'PM查询 / PM Query')
+        module_prefix: Prefix for requirement IDs (e.g., 'PM', 'UM')
+        requirements: List of requirement dicts
+        template_content: Current template content (for dynamic section numbering)
+    """
     name_parts = module_name.split(" / ")
     cn_name = name_parts[0] if len(name_parts) > 0 else module_id
     en_name = name_parts[1].split("(")[0].strip() if len(name_parts) > 1 else module_id
 
-    # Determine section number
-    section_num = _get_module_section_number(module_id)
+    section_num = (
+        _get_next_section_number(template_content) if template_content else "1"
+    )
 
     lines = [
         f"### 4.{section_num} {cn_name} / {en_name}",
@@ -1221,6 +1234,7 @@ def sync_bidirectional(
                 module_info["name"],
                 module_info.get("prefix", module_id[:3].upper()),
                 reqs,
+                template_content,
             )
 
             # Insert before "## 5. 非功能需求"

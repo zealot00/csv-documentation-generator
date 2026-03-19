@@ -18,7 +18,7 @@ triggers:
   - "LIMS"
   - "医疗器械"
 category: gxp-compliance
-version: "1.3.2"
+version: "1.3.3"
 author: zealot00
 homepage: https://github.com/zealot00/csv-documentation-generator
 repository: https://github.com/zealot00/csv-documentation-generator
@@ -554,6 +554,12 @@ python3 scripts/generate.py urs --sync --conflict-resolution json
 # Keep newer version based on updated_at
 python3 scripts/generate.py urs --sync --conflict-resolution newer
 ```
+
+**Section numbering behavior:**
+- Sync automatically creates module sections with `### 4.X` headers
+- Section numbers are dynamically assigned based on existing sections in the template
+- Only modules with requirements in `requirements.json` will have sections created
+- Custom modules (e.g., `pm_query`, `multi_lock`) are supported and will be assigned the next available section number
 
 ### Monorepo Support
 

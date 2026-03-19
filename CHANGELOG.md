@@ -4,6 +4,15 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.3.3] - 2026-03-19
+
+### Fixed
+
+#### GxP 合规修复
+- **动态章节编号**: 移除硬编码的 `STANDARD_MODULES` 编号映射，改用 `_get_next_section_number()` 动态计算模板中下一个可用 4.X 编号
+- 确保自定义模块（如 `pm_query`, `multi_lock`）获得唯一、无冲突的章节编号
+- 添加 SKILL.md 文档说明章节编号行为
+
 ## [1.3.2] - 2026-03-19
 
 ### Fixed

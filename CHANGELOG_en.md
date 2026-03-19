@@ -2,6 +2,15 @@
 
 All notable version updates are documented here.
 
+## [1.3.3] - 2026-03-19
+
+### Fixed
+
+#### GxP Compliance Fix
+- **Dynamic Section Numbering**: Removed hardcoded `STANDARD_MODULES` number mapping, now uses `_get_next_section_number()` to dynamically calculate next available 4.X number in template
+- Ensures custom modules (e.g., `pm_query`, `multi_lock`) get unique, non-conflicting section numbers
+- Added SKILL.md documentation explaining section numbering behavior
+
 ## [1.3.2] - 2026-03-19
 
 ### Fixed
