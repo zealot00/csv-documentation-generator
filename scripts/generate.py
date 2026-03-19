@@ -27,7 +27,7 @@ from typing import Dict, List, Any, Optional
 sys.path.insert(0, str(Path(__file__).parent))
 
 from config import Config, get_gamp_category_description
-from template_loader import TemplateLoader
+from template_loader import TemplateLoader, process_markdown_table_bilingual
 from word_generator import WordGenerator
 from excel_generator import ExcelGenerator
 from requirements.parser import STANDARD_MODULES, RequirementsParser
@@ -230,9 +230,17 @@ Examples:
     parser.add_argument(
         "--bilingual",
         "-b",
+        type=lambda x: x.lower() == "true",
         default=True,
-        type=bool,
-        help="Generate bilingual templates (default: True)",
+        help="Enable bilingual mode: 'true' or 'false' (default: True). When true, headers remain bilingual and content follows --language.",
+    )
+
+    parser.add_argument(
+        "--language",
+        "-l",
+        choices=["zh", "en"],
+        default="zh",
+        help="Primary language for content: 'zh' (Chinese) or 'en' (English). Used when bilingual=false or for content in bilingual mode. (default: zh)",
     )
 
     parser.add_argument("--output", "-o", default="./output", help="Output directory")
@@ -573,6 +581,12 @@ def generate_document(
             # Word generation
             try:
                 template_content = template_loader.load_template(doc_type)
+                # Process bilingual content based on config
+                template_content = process_markdown_table_bilingual(
+                    template_content,
+                    bilingual=config.bilingual,
+                    language=config.language,
+                )
             except FileNotFoundError:
                 print(f"Warning: Template not found for {doc_type}, using default")
                 template_content = f"# {doc_info['name']}\n\nDocument: {config.project}\nSystem: {config.system}"
@@ -1521,6 +1535,7 @@ def main():
         system=args.system,
         category=args.category,
         bilingual=args.bilingual,
+        language=args.language,
         output=args.output,
         format=args.format,
         doc_id=args.doc_id,
@@ -1591,150 +1606,150 @@ if __name__ == "__main__":
 class SemanticActions:
     """
     Semantic Action Graph for CSV Documentation Generation.
-    
+
     This class encapsulates the skill's capabilities as a semantic action graph,
     following the design philosophy that Skill = Tool's semantic encapsulation + reasoning trigger conditions.
-    
+
     Each method represents a semantic action that can be dynamically invoked by an AI agent.
     """
-    
+
     def __init__(self, skill_root: Optional[Path] = None):
         """Initialize SemanticActions with skill root path."""
         self.skill_root = skill_root or get_skill_root()
         self.venv_path = None
         self._ensure_environment()
-    
+
     def _ensure_environment(self):
         """Ensure Python environment is set up."""
         if not is_in_venv():
             self.venv_path = ensure_venv()
-    
+
     def parse_requirements(self, source_path: str) -> Dict[str, Any]:
         """
         Parse @URS, @FS, @TEST markers from source code.
-        
+
         Args:
             source_path: Path to source code directory
-            
+
         Returns:
             RequirementsDB dictionary with requirements, risks, test_results
         """
         parser = RequirementsParser()
         db = parser.parse_directory(source_path)
         return db
-    
+
     def generate_vp(self, context: Dict[str, Any]) -> List[str]:
         """
         Create Validation Plan document.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of generated file paths
         """
         config = self._create_config(context)
         return generate_document("vp", config)
-    
+
     def generate_urs(self, context: Dict[str, Any]) -> List[str]:
         """
         Create User Requirements Specification document.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of generated file paths
         """
         config = self._create_config(context)
         return generate_document("urs", config)
-    
+
     def generate_fs(self, context: Dict[str, Any]) -> List[str]:
         """
         Create Functional Specification document.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of generated file paths
         """
         config = self._create_config(context)
         return generate_document("fs", config)
-    
+
     def generate_ra(self, context: Dict[str, Any]) -> List[str]:
         """
         Create Risk Assessment document.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
                   Optional: change_description for change-driven RA
-            
+
         Returns:
             List of generated file paths
         """
         config = self._create_config(context)
         return generate_document("ra", config)
-    
+
     def generate_ts(self, context: Dict[str, Any]) -> List[str]:
         """
         Create Technical Specification document.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of generated file paths
         """
         config = self._create_config(context)
         return generate_document("ts", config)
-    
+
     def generate_iq(self, context: Dict[str, Any]) -> List[str]:
         """
         Create Installation Qualification protocol.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of generated file paths
         """
         config = self._create_config(context)
         return generate_document("iq", config)
-    
+
     def generate_oq(self, context: Dict[str, Any]) -> List[str]:
         """
         Create Operational Qualification protocol.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of generated file paths
         """
         config = self._create_config(context)
         return generate_document("oq", config)
-    
+
     def generate_pq(self, context: Dict[str, Any]) -> List[str]:
         """
         Create Performance Qualification protocol.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of generated file paths
         """
         config = self._create_config(context)
         return generate_document("pq", config)
-    
+
     def generate_iq_oq_pq(self, context: Dict[str, Any]) -> List[str]:
         """
         Create all Qualification protocols (IQ, OQ, PQ).
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of all generated file paths
         """
@@ -1743,62 +1758,62 @@ class SemanticActions:
         for doc_type in ["iq", "oq", "pq"]:
             files.extend(generate_document(doc_type, config))
         return files
-    
+
     def generate_rtm(self, context: Dict[str, Any]) -> List[str]:
         """
         Create Requirements Traceability Matrix.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of generated file paths
         """
         config = self._create_config(context)
         return generate_document("rtm", config)
-    
+
     def generate_vsr(self, context: Dict[str, Any]) -> List[str]:
         """
         Create Validation Summary Report.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of generated file paths
         """
         config = self._create_config(context)
         return generate_document("vsr", config)
-    
+
     def generate_all(self, context: Dict[str, Any]) -> List[str]:
         """
         Generate complete validation package.
-        
+
         Args:
             context: Dict with project, system, category, output, etc.
-            
+
         Returns:
             List of all generated file paths
         """
         config = self._create_config(context)
         return generate_all(config)
-    
+
     def sync_bidirectional(
         self,
         doc_type: str,
         project_path: str,
         direction: str = "both",
-        conflict_resolution: str = "template"
+        conflict_resolution: str = "template",
     ) -> Dict[str, Any]:
         """
         Bidirectional sync between requirements.json and templates.
-        
+
         Args:
             doc_type: Document type (urs, fs, ts)
             project_path: Path to project directory
             direction: Sync direction (to-json, to-template, both)
             conflict_resolution: How to resolve conflicts (template, json, newer)
-            
+
         Returns:
             Dict with sync results
         """
@@ -1806,45 +1821,45 @@ class SemanticActions:
             doc_type,
             Path(project_path),
             direction=direction,
-            conflict_resolution=conflict_resolution
+            conflict_resolution=conflict_resolution,
         )
         return {"status": "success", "result": result}
-    
+
     def run_compliance_check(
         self,
         requirements_path: str,
         test_results_path: Optional[str] = None,
-        output_format: str = "text"
+        output_format: str = "text",
     ) -> Dict[str, Any]:
         """
         Verify GxP compliance of requirements and test results.
-        
+
         Args:
             requirements_path: Path to requirements.json
             test_results_path: Optional path to test_results.json
             output_format: Output format (text or json)
-            
+
         Returns:
             Compliance report dictionary
         """
         checker = ComplianceChecker()
-        
+
         with open(requirements_path, "r", encoding="utf-8") as f:
             requirements = json.load(f)
-        
+
         test_results = None
         if test_results_path:
             with open(test_results_path, "r", encoding="utf-8") as f:
                 test_results = json.load(f)
-        
+
         report = checker.check(requirements, test_results)
-        
+
         if output_format == "json":
             return {"status": "success", "report": report}
-        
+
         checker.print_report(report)
         return {"status": "success", "report": report}
-    
+
     def _create_config(self, context: Dict[str, Any]) -> Config:
         """Create Config object from context dictionary."""
         return Config(
@@ -1852,6 +1867,7 @@ class SemanticActions:
             system=context.get("system"),
             category=context.get("category", 4),
             bilingual=context.get("bilingual", True),
+            language=context.get("language", "zh"),
             output=context.get("output", "./output"),
             format=context.get("format", "both"),
             doc_id=context.get("doc_id"),
@@ -1861,5 +1877,3 @@ class SemanticActions:
             approver=context.get("approver"),
             critical_functions=context.get("critical_functions"),
         )
-
-

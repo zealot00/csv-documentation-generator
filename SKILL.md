@@ -177,7 +177,8 @@ AI agents should guide users to select the appropriate category based on GAMP 5 
 | `--project` | Project name | Yes |
 | `--system` | System name and version | Yes |
 | `--category` | GAMP category (1-5). If not specified, interactive selection will be prompted with bilingual GAMP 5 guidance. | No (will prompt) |
-| `--bilingual` | Generate bilingual templates (default: true) | No |
+| `--bilingual` | Enable bilingual mode: 'true' or 'false' (default: true). When true, headers remain bilingual and content follows --language. | No |
+| `--language` | Primary language for content: 'zh' (Chinese) or 'en' (English) (default: zh). Used when bilingual=false or for content in bilingual mode. | No |
 | `--output` | Output directory | Yes |
 | `--format` | Output format: docx, xlsx, or both (default: both) | No |
 
@@ -359,7 +360,18 @@ AI agents SHOULD reference these examples for content style guidance when fillin
 
 ## Bilingual Format
 
-All templates support Chinese/English bilingual output:
+All templates support **Smart Bilingual** output controlled by `--bilingual` and `--language` flags:
+
+| `--bilingual` | `--language` | Behavior |
+|---------------|--------------|----------|
+| `true` (default) | `zh` | Headers bilingual, content in Chinese |
+| `true` (default) | `en` | Headers bilingual, content in English |
+| `false` | `zh` | Pure Chinese output |
+| `false` | `en` | Pure English output |
+
+### Bilingual Template Format
+
+Templates use dual-language format for headers:
 
 ```markdown
 ## 1. 目的 / Purpose
@@ -373,6 +385,12 @@ Tables use dual-language headers:
 |------|---------|
 | 验证计划 | Validation Plan |
 | 用户需求 | User Requirements |
+
+Content cells use format like `中文 / English`:
+
+| 模块 / Module | 描述 / Description |
+|--------------|-------------------|
+| 用户管理 / User Management | 系统应... / System should... |
 
 ## Requirements Traceability
 

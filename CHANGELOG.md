@@ -4,14 +4,27 @@
 
 **[English Version](CHANGELOG_en.md)**
 
-## [1.4.0] - 2026-03-19
+## [1.6.0] - 2026-03-19
+
+### Added
+
+#### 智能双语模式 (Smart Bilingual)
+- **--language 参数**: 新增 `--language` 参数支持选择内容语言 ('zh' 或 'en')
+- **智能双语处理**: 实现 `process_markdown_table_bilingual()` 函数，根据 `--bilingual` 和 `--language` 智能处理输出
+
+### Changed
+
+#### 双语行为调整
+- `--bilingual true` (默认): Headers 保持双语，内容根据 `--language` 填充
+- `--bilingual false`: 纯单语输出，由 `--language` 决定语言
+- 用户和 AI agent 现在可以完全控制文档语言输出
 
 ## [1.5.0] - 2026-03-19
 
 ### Changed
 
 #### Skill 设计哲学重构
-- **SKILL.md 精简**: 从 1034 行精简至 784 行，移除 prompt 内容至 prompts.md
+- **SKILL.md 精简**: 从 1034 行精简至 ~785 行，移除 prompt 内容至 prompts.md
 - **Semantic Action Graph**: 新增显式的语义动作图定义，展示文档生成间的依赖关系
 - **prompts.md 新建**: 将 Critical Thinking Constraints、触发条件、填充 Prompt 迁移至独立文件
 - **SemanticActions 类**: 在 generate.py 中新增 SemanticActions 类，封装为可被 AI agent 动态调用的能力节点

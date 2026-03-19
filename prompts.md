@@ -326,6 +326,31 @@ When generating RA, AI SHOULD follow this structure:
 
 ## 5. Bilingual Output Prompts
 
+### 智能双语模式 (Smart Bilingual)
+
+此 skill 支持智能双语输出，根据 `--bilingual` 和 `--language` 参数生成不同语言版本：
+
+| 参数组合 | 行为 |
+|---------|------|
+| `--bilingual true --language zh` | Headers 保持双语 (`目的 / Purpose`)，内容填充中文 |
+| `--bilingual true --language en` | Headers 保持双语 (`目的 / Purpose`)，内容填充英文 |
+| `--bilingual false --language zh` | 纯中文输出 |
+| `--bilingual false --language en` | 纯英文输出 |
+
+### 模板双语格式
+
+模板使用以下格式来表示双语内容：
+
+```markdown
+| 中文 / English | 描述 / Description |
+|----------------|-------------------|
+| 用户管理 / User Management | 用户 / User |
+```
+
+**处理规则：**
+- Header 行：保持双语格式
+- Content 行：根据 `--language` 选择一种语言
+
 ### 双语表格Header
 
 ```markdown
@@ -342,3 +367,15 @@ When generating RA, AI SHOULD follow this structure:
 
 本文档定义了... / This document defines...
 ```
+
+### 内容填充语言选择
+
+当 AI agent 填充模板内容时，应根据 `--language` 参数选择语言：
+
+- `--language zh`：所有 AI 填充内容使用中文
+- `--language en`：所有 AI 填充内容使用英文
+
+这允许：
+1. 同一项目可生成不同语言版本用于不同受众
+2. 保留标题双语便于对照理解
+3. AI 可根据用户上下文自动选择语言
