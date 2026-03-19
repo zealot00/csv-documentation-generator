@@ -52,9 +52,11 @@ When generating code, AI agents SHOULD use these annotation markers:
 # @TS TS-001  # References Technical Specification
 ```
 
-## System Prompt Integration
+## System Prompt Integration (Manual Configuration Required)
 
-To enable cross-skill annotation enforcement, add the following rules to your AI agent's system prompt:
+> ⛔ This step is **NOT automatic**. You must manually add these rules to your agent's system prompt (AGENTS.md) if you want @REQ/@TEST annotations to apply across ALL skills.
+
+To enable cross-skill annotation enforcement, add the following to your AGENTS.md or agent system prompt:
 
 ```
 Code Annotation Rules (for GxP traceability):
@@ -67,11 +69,13 @@ Code Annotation Rules (for GxP traceability):
 
 ### How to Add to Your System Prompt
 
-1. Find your AI agent's system prompt configuration
+1. Find your AI agent's system prompt configuration (e.g., AGENTS.md)
 2. Append the rules above to the existing system prompt
 3. The rules will apply to ALL code generation, not just this skill
 
-### Benefits of System Prompt Integration
+### Why This Is Needed
+
+**OpenClaw skills only execute when active.** There is no mechanism to make instructions persist across skill switches except via the system prompt.
 
 | Without System Prompt | With System Prompt |
 |---------------------|-------------------|

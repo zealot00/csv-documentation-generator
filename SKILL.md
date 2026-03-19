@@ -470,9 +470,11 @@ def assign_role(user_id: str, role: str) -> bool:
 
 **注意**: 章节号（4.X）是动态分配的，基于模板中已有的章节。同步时会自动为新模块分配下一个可用编号。
 
-### System Prompt Integration
+### System Prompt Integration (Manual Configuration Required)
 
-To enable cross-skill annotation enforcement (so other skills also add @REQ markers), add the following rules to your AI agent's system prompt:
+> ⛔ This step is **NOT automatic**. You must manually add these rules to your agent's system prompt (AGENTS.md) if you want @REQ/@TEST annotations to apply across ALL skills.
+
+To enable cross-skill annotation enforcement, add the following to your AGENTS.md or agent system prompt:
 
 ```
 Code Annotation Rules (for GxP traceability):
@@ -483,9 +485,8 @@ Code Annotation Rules (for GxP traceability):
 - Mark low-risk code with @RISK L
 ```
 
-**Why this matters:**
-- Without system prompt integration: Only applies when this skill is active
-- With system prompt integration: Applies to ALL code generation across all skills
+**Why this is needed:**
+OpenClaw skills only execute when active. There is no mechanism to make instructions persist across skill switches except via the system prompt.
 
 See [`STANDARDS.md`](STANDARDS.md) for full documentation and [`standards/code-annotations.json`](standards/code-annotations.json) for the standards file.
 
