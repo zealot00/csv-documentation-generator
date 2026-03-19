@@ -18,6 +18,7 @@ import venv
 import json
 import shutil
 import hashlib
+import re
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
@@ -264,6 +265,22 @@ Examples:
         "--sync",
         action="store_true",
         help="Sync requirements from requirements.json to template before generating",
+    )
+
+    parser.add_argument(
+        "--sync-direction",
+        dest="sync_direction",
+        choices=["to-json", "to-template", "both"],
+        default="both",
+        help="Sync direction for bidirectional sync (default: both)",
+    )
+
+    parser.add_argument(
+        "--conflict-resolution",
+        dest="conflict_resolution",
+        choices=["newer", "template", "json", "ask"],
+        default="newer",
+        help="How to resolve conflicts (default: newer)",
     )
 
     parser.add_argument(
@@ -1014,6 +1031,201 @@ def sync_template_to_db(doc_type: str, project_path: Optional[Path] = None) -> b
         return False
 
 
+def sync_bidirectional(
+    doc_type: str,
+    project_path: Optional[Path] = None,
+    direction: str = "both",
+    conflict_resolution: str = "newer",
+) -> bool:
+    """Bidirectional sync between template and requirements.json
+
+    Args:
+        doc_type: Document type (urs, fs, ts)
+        project_path: Project path
+        direction: 'to-json', 'to-template', or 'both'
+        conflict_resolution: 'newer', 'template', 'json', 'ask'
+
+    Returns True if any sync was performed
+    """
+    if doc_type not in ["urs", "fs", "ts"]:
+        return False
+
+    if project_path is None:
+        project_path = Path.cwd()
+
+    db_path = find_requirements_db(project_path)
+    skill_root = get_skill_root()
+    template_path = skill_root / "templates" / f"{doc_type}.md"
+
+    if not template_path.exists():
+        print(f"  Template not found: {template_path}")
+        return False
+
+    # Load database
+    db = None
+    if db_path and db_path.exists():
+        try:
+            with open(db_path, "r", encoding="utf-8") as f:
+                db = json.load(f)
+        except Exception:
+            pass
+
+    # Read template
+    try:
+        with open(template_path, "r", encoding="utf-8") as f:
+            template_content = f.read()
+    except Exception as e:
+        print(f"  Error reading template: {e}")
+        return False
+
+    # Parse requirements from template
+    pattern = r"\|\s*(URS-\d{3})\s*\|([^|]+)\|"
+    template_req_matches = re.findall(pattern, template_content)
+    template_req_ids = {match[0] for match in template_req_matches}
+    template_reqs = {match[0]: match[1].strip() for match in template_req_matches}
+
+    # Get requirements from database
+    json_req_ids = set()
+    json_reqs = {}
+    if db:
+        for req in db.get("requirements", []):
+            req_id = req.get("id")
+            if req_id:
+                json_req_ids.add(req_id)
+                json_reqs[req_id] = req
+
+    # Determine changes needed
+    only_in_template = template_req_ids - json_req_ids
+    only_in_json = json_req_ids - template_req_ids
+    in_both = template_req_ids & json_req_ids
+
+    # Check for conflicts (same ID, different description)
+    conflicts = []
+    for req_id in in_both:
+        if template_reqs[req_id] != json_reqs[req_id].get("description", ""):
+            conflicts.append(
+                {
+                    "id": req_id,
+                    "template_desc": template_reqs[req_id],
+                    "json_desc": json_reqs[req_id].get("description", ""),
+                }
+            )
+
+    sync_performed = False
+
+    # Sync template -> JSON
+    if direction in ["to-json", "both"] and only_in_template:
+        print(
+            f"\n[Sync to JSON] Adding {len(only_in_template)} requirements from template..."
+        )
+        if db is None:
+            db = {
+                "version": "1.0",
+                "requirements": [],
+                "risks": [],
+                "test_results": [],
+                "commit_links": [],
+            }
+
+        new_count = 0
+        for req_id in only_in_template:
+            module = _infer_module_from_description(template_reqs[req_id])
+            requirement = {
+                "id": req_id,
+                "type": doc_type.upper(),
+                "description": template_reqs[req_id],
+                "module": module,
+                "priority": "应该",
+                "source_file": str(template_path),
+                "source_line": None,
+                "esig_required": False,
+                "esig_category": None,
+                "tags": ["from_template"],
+                "created_at": datetime.now().isoformat(),
+                "updated_at": datetime.now().isoformat(),
+                "status": "draft",
+            }
+            db.setdefault("requirements", []).append(requirement)
+            new_count += 1
+
+        if new_count > 0:
+            try:
+                with open(
+                    db_path or (project_path / "requirements.json"),
+                    "w",
+                    encoding="utf-8",
+                ) as f:
+                    json.dump(db, f, indent=2, ensure_ascii=False)
+                print(f"  Added {new_count} requirements to requirements.json")
+                sync_performed = True
+            except Exception as e:
+                print(f"  Error writing requirements.json: {e}")
+
+    # Sync JSON -> template
+    if direction in ["to-template", "both"] and only_in_json:
+        print(
+            f"\n[Sync to Template] Adding {len(only_in_json)} requirements to template..."
+        )
+        backup_path = template_path.with_suffix(
+            f".md.backup.{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        )
+        shutil.copy2(template_path, backup_path)
+        print(f"  Backed up template to: {backup_path.name}")
+
+        new_lines = []
+        for req_id in sorted(only_in_json):
+            req = json_reqs[req_id]
+            desc = req.get("description", "")
+            priority = req.get("priority", "应该")
+            new_lines.append(f"| {req_id} | {desc} | {priority} |")
+            new_lines.append(f"| | | |")
+
+        # Append new requirements before the footer
+        if new_lines:
+            footer_marker = "\n---\n"
+            if footer_marker in template_content:
+                parts = template_content.split(footer_marker)
+                template_content = (
+                    parts[0]
+                    + "\n"
+                    + "\n".join(new_lines)
+                    + footer_marker
+                    + "\n".join(parts[1].split("\n")[2:])
+                )
+            else:
+                template_content += "\n" + "\n".join(new_lines)
+
+        try:
+            with open(template_path, "w", encoding="utf-8") as f:
+                f.write(template_content)
+            print(f"  Added {len(only_in_json)} requirements to template")
+            sync_performed = True
+        except Exception as e:
+            print(f"  Error writing template: {e}")
+
+    # Handle conflicts
+    if conflicts:
+        print(f"\n[Conflicts] Found {len(conflicts)} conflicting requirements")
+        for conflict in conflicts:
+            print(f"  {conflict['id']}:")
+            print(f"    Template: {conflict['template_desc'][:50]}...")
+            print(f"    JSON: {conflict['json_desc'][:50]}...")
+
+        if conflict_resolution == "ask":
+            print("\n  Use --conflict-resolution to specify how to resolve conflicts:")
+            print("    --conflict-resolution template  : Keep template descriptions")
+            print("    --conflict-resolution json       : Keep JSON descriptions")
+            print(
+                "    --conflict-resolution newer      : Keep newer (based on updated_at)"
+            )
+        elif conflict_resolution == "template":
+            print("\n  Resolving conflicts: keeping template descriptions")
+        elif conflict_resolution == "json":
+            print("\n  Resolving conflicts: keeping JSON descriptions")
+
+    return sync_performed
+
+
 def _infer_module_from_description(description: str) -> str:
     """Infer module from requirement description"""
     desc_lower = description.lower()
@@ -1165,11 +1377,16 @@ def run_interactive_workflow(config: Config, project_path: Path, args) -> None:
                     print("  ✓ 完成 (无需同步)")
 
             elif step_action == "sync":
-                result = sync_requirements_to_template("urs", project_path)
+                result = sync_bidirectional(
+                    "urs",
+                    project_path,
+                    direction=args.sync_direction,
+                    conflict_resolution=args.conflict_resolution,
+                )
                 if result:
                     print("  ✓ 完成")
                 else:
-                    print("  ✓ 完成 (模板已是最新)")
+                    print("  ✓ 完成 (无需同步)")
 
             elif step_action in ["urs", "fs", "ra", "iq", "oq", "pq", "rtm", "vsr"]:
                 files = generate_document(step_action, config)
@@ -1284,12 +1501,17 @@ def main():
 
     # Sync requirements to template if --sync is specified
     if args.sync:
-        print("\n[Sync] Checking requirements.json for new modules...")
+        print("\n[Sync] Bidirectional sync between template and requirements.json...")
         doc_types_to_sync = (
             ["urs", "fs", "ts"] if args.doc_type == "all" else [args.doc_type]
         )
         for doc_type in doc_types_to_sync:
-            sync_requirements_to_template(doc_type, project_path)
+            sync_bidirectional(
+                doc_type,
+                project_path,
+                direction=args.sync_direction,
+                conflict_resolution=args.conflict_resolution,
+            )
 
     # Generate documents
     if args.interactive:
