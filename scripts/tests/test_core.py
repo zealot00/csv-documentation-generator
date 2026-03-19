@@ -94,11 +94,10 @@ class TestRequirementsParser(unittest.TestCase):
 
     def test_parse_file(self):
         """Test parsing requirements from file"""
-        # Create test file
         test_file = self.project_path / "test.py"
         with open(test_file, "w") as f:
-            f.write("# @req URS-001 用户登录功能\n")
-            f.write("# @req 必须的密码验证\n")
+            f.write("# @REQ URS-001 - 用户登录功能\n")
+            f.write("# @REQ URS-002 - 必须的密码验证\n")
 
         parser = RequirementsParser(self.project_path)
         requirements = parser.parse_file(test_file)
