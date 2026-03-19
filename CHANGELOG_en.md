@@ -2,6 +2,20 @@
 
 All notable version updates are documented here.
 
+## [1.6.4] - 2026-03-20
+
+### Fixed
+
+#### System Prompt Integration Documentation Clarification
+- Emphasized that System Prompt integration is a **manual configuration** step, not automatic
+- Explained that OpenClaw skills only execute when active, cannot persist instructions across skill switches
+
+### Changed
+
+#### Documentation Enhancements
+- SKILL.md: Added --auto-add examples, --verbose option, AI Agent usage examples
+- README.md/README_en.md: AI Agent usage examples, --verbose option
+
 ## [1.6.1] - 2026-03-20
 
 ### Fixed

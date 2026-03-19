@@ -4,6 +4,20 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.6.4] - 2026-03-20
+
+### Fixed
+
+#### System Prompt Integration 文档澄清
+- 强调 System Prompt 集成是**手动配置**步骤，非自动
+- 说明 OpenClaw skill 仅在激活时执行，无法跨 skill 持久化指令
+
+### Changed
+
+#### 文档增强
+- SKILL.md: 添加 --auto-add 示例、--verbose 选项、AI Agent 使用示例
+- README.md/README_en.md: AI Agent 使用示例、--verbose 选项
+
 ## [1.6.1] - 2026-03-20
 
 ### Fixed
