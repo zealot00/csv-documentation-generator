@@ -292,6 +292,13 @@ Examples:
     )
 
     parser.add_argument(
+        "--project-root",
+        dest="project_root",
+        default=None,
+        help="Project root for monorepo (auto-detected if not specified)",
+    )
+
+    parser.add_argument(
         "--requirements",
         "-r",
         dest="requirements",
@@ -620,6 +627,75 @@ def find_requirements_db(project_path: Path) -> Optional[Path]:
         if path.exists() and path.is_file():
             print(f"  Found requirements.json at: {path}")
             return path
+
+    return None
+
+
+def find_monorepo_projects(root_path: Path) -> List[Dict[str, Any]]:
+    """Find all projects within a monorepo structure
+
+    Detects common monorepo layouts:
+    - apps/ or packages/ directories with individual project folders
+    - Each subproject has its own requirements.json
+
+    Returns list of dicts with {name, path, requirements_path}
+    """
+    projects = []
+    search_dirs = ["apps", "packages", "projects", "modules", "services", "src"]
+
+    for search_dir in search_dirs:
+        dir_path = root_path / search_dir
+        if not dir_path.exists():
+            continue
+
+        for item in dir_path.iterdir():
+            if not item.is_dir():
+                continue
+
+            req_path = item / "requirements.json"
+            if req_path.exists():
+                projects.append(
+                    {"name": item.name, "path": item, "requirements_path": req_path}
+                )
+            else:
+                nested_req = find_requirements_db(item)
+                if nested_req:
+                    projects.append(
+                        {
+                            "name": item.name,
+                            "path": item,
+                            "requirements_path": nested_req,
+                        }
+                    )
+
+    return projects
+
+
+def detect_monorepo_root(project_path: Path) -> Optional[Path]:
+    """Detect if project is part of a monorepo and return root path
+
+    Looks for monorepo indicators:
+    - apps/, packages/, projects/ directories
+    - root requirements.json with workspace config
+    - package.json with workspaces field
+    - rush.json, pnpm-workspace.yaml, lerna.json
+    """
+    monorepo_indicators = ["apps", "packages", "projects", "modules", "services"]
+
+    indicators_found = []
+    for indicator in monorepo_indicators:
+        if (project_path / indicator).exists():
+            indicators_found.append(indicator)
+
+    if indicators_found:
+        return project_path
+
+    parent = project_path.parent
+    for _ in range(3):
+        for indicator in monorepo_indicators:
+            if (parent / indicator).exists():
+                return parent
+        parent = parent.parent
 
     return None
 
@@ -1156,7 +1232,22 @@ def main():
     )
 
     # Determine project path
-    project_path = Path(args.output).parent if args.output != "./output" else Path.cwd()
+    if args.project_root:
+        project_path = Path(args.project_root)
+    elif args.output != "./output":
+        project_path = Path(args.output).parent
+    else:
+        project_path = Path.cwd()
+
+    # Detect monorepo structure
+    monorepo_root = detect_monorepo_root(project_path)
+    if monorepo_root:
+        print(f"[Monorepo] Detected root: {monorepo_root}")
+        subprojects = find_monorepo_projects(monorepo_root)
+        if subprojects:
+            print(f"[Monorepo] Found {len(subprojects)} subprojects:")
+            for p in subprojects:
+                print(f"  - {p['name']}: {p['path']}")
 
     # Handle --sync-template-to-db first (before any document generation)
     if args.sync_template_to_db:
