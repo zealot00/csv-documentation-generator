@@ -18,7 +18,7 @@ triggers:
   - "LIMS"
   - "医疗器械"
 category: gxp-compliance
-version: "1.2.0"
+version: "1.3.0"
 author: zealot00
 homepage: https://github.com/zealot00/csv-documentation-generator
 repository: https://github.com/zealot00/csv-documentation-generator
@@ -524,6 +524,96 @@ Install post-commit hooks to automatically run compliance checks after code comm
 - Detects commits with code or requirements changes
 - Runs compliance check (non-blocking)
 - Outputs warnings to stderr without blocking commit
+
+### Bidirectional Sync
+
+Use `--sync` for bidirectional sync between template and requirements.json:
+
+```bash
+# Full bidirectional sync (both directions)
+python3 scripts/generate.py urs --sync \
+  --project "临床系统" \
+  --system "EDC v1.0" \
+  --category 4
+
+# Only sync template → JSON
+python3 scripts/generate.py urs --sync --sync-direction to-json
+
+# Only sync JSON → template
+python3 scripts/generate.py urs --sync --sync-direction to-template
+```
+
+**Conflict resolution:**
+```bash
+# Keep template descriptions on conflict
+python3 scripts/generate.py urs --sync --conflict-resolution template
+
+# Keep JSON descriptions on conflict
+python3 scripts/generate.py urs --sync --conflict-resolution json
+
+# Keep newer version based on updated_at
+python3 scripts/generate.py urs --sync --conflict-resolution newer
+```
+
+### Monorepo Support
+
+For projects with multiple subprojects (monorepo structure):
+
+```bash
+# Auto-detect monorepo root
+python3 scripts/generate.py rtm --project "临床系统" --system "EDC v1.0"
+
+# Explicitly specify monorepo root
+python3 scripts/generate.py rtm --project "临床系统" --system "EDC v1.0" \
+  --project-root /path/to/monorepo
+```
+
+**Detected monorepo layouts:**
+- `apps/`, `packages/`, `projects/`, `modules/`, `services/` directories
+- Each subproject with its own `requirements.json`
+
+### Template Versioning
+
+Templates are versioned for compatibility tracking:
+
+```bash
+# Check compatibility (automatic on generate)
+python3 scripts/generate.py rtm --project "系统" --system "v1.0" --category 4
+
+# Specify template version
+python3 scripts/generate.py rtm --template-version 1.2.0 \
+  --project "系统" --system "v1.0" --category 4
+```
+
+**Automatic migrations:**
+- Templates are automatically migrated to current version
+- Version checks prevent incompatible generator/template combinations
+
+### CI/CD Integration
+
+Use provided CI/CD templates for automated documentation generation:
+
+**GitHub Actions** (`templates/ci/github-actions.yml`):
+```yaml
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+  with:
+    python-version: '3.11'
+- run: pip install -r requirements.txt
+- run: python scripts/generate.py check --output-format json
+- run: python scripts/generate.py all --diff-only
+```
+
+**GitLab CI** (`templates/ci/gitlab-ci.yml`):
+```yaml
+generate:rtm:
+  extends: .csv-docs-base
+  script:
+    - python scripts/generate.py rtm --diff-only
+  artifacts:
+    paths:
+      - validation/RTM*.xlsx
+```
 
 ### Important Notes
 
