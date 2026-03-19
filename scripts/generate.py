@@ -17,6 +17,7 @@ import subprocess
 import venv
 import json
 import shutil
+import hashlib
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
@@ -285,6 +286,12 @@ Examples:
     )
 
     parser.add_argument(
+        "--diff-only",
+        action="store_true",
+        help="Skip regeneration if requirements unchanged (smart rebuild)",
+    )
+
+    parser.add_argument(
         "--requirements",
         "-r",
         dest="requirements",
@@ -413,8 +420,49 @@ def generate_coverage_summary_markdown(db: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _compute_requirements_hash(db: Dict[str, Any]) -> str:
+    """Compute hash of requirements for change detection"""
+    reqs = json.dumps(db.get("requirements", []), sort_keys=True)
+    return hashlib.sha256(reqs.encode()).hexdigest()[:16]
+
+
+def _check_requirements_changed(db: Dict[str, Any], output_dir: Path) -> bool:
+    """Check if requirements have changed since last generation
+
+    Returns:
+        True if requirements changed or no previous hash exists
+    """
+    hash_file = output_dir / ".requirements.hash"
+
+    if not hash_file.exists():
+        return True
+
+    try:
+        with open(hash_file, "r") as f:
+            old_hash = f.read().strip()
+    except Exception:
+        return True
+
+    new_hash = _compute_requirements_hash(db)
+    return new_hash != old_hash
+
+
+def _save_requirements_hash(db: Dict[str, Any], output_dir: Path) -> None:
+    """Save requirements hash for incremental update tracking"""
+    hash_file = output_dir / ".requirements.hash"
+    hash_value = _compute_requirements_hash(db)
+    try:
+        with open(hash_file, "w") as f:
+            f.write(hash_value)
+    except Exception:
+        pass
+
+
 def generate_document(
-    doc_type: str, config: Config, db: Optional[Dict[str, Any]] = None
+    doc_type: str,
+    config: Config,
+    db: Optional[Dict[str, Any]] = None,
+    diff_only: bool = False,
 ):
     """Generate a single document"""
 
@@ -447,6 +495,13 @@ def generate_document(
                     db = json.load(f)
             except Exception:
                 pass
+
+    # Smart rebuild: skip if requirements unchanged
+    if diff_only and db and doc_type in ["vsr", "rtm", "ra"]:
+        output_dir = Path(config.output)
+        if not _check_requirements_changed(db, output_dir):
+            print(f"Skipping {doc_type}: requirements unchanged since last generation")
+            return []
 
     output_files = []
 
@@ -493,10 +548,14 @@ def generate_document(
             output_files.append(output_file)
             print(f"Generated: {output_file}")
 
+    # Save requirements hash after successful RTM generation for incremental updates
+    if doc_type in ["vsr", "rtm", "ra"] and db:
+        _save_requirements_hash(db, Path(config.output))
+
     return output_files
 
 
-def generate_all(config: Config):
+def generate_all(config: Config, diff_only: bool = False):
     """Generate all documents"""
 
     doc_types = [
@@ -522,7 +581,7 @@ def generate_all(config: Config):
 
     for doc_type in doc_types:
         try:
-            files = generate_document(doc_type, config)
+            files = generate_document(doc_type, config, diff_only=diff_only)
             all_files.extend(files)
         except Exception as e:
             print(f"Error generating {doc_type}: {e}")
@@ -1122,9 +1181,9 @@ def main():
     elif args.doc_type == "check":
         run_compliance_check(args)
     elif args.doc_type == "all":
-        generate_all(config)
+        generate_all(config, diff_only=args.diff_only)
     else:
-        generate_document(args.doc_type, config)
+        generate_document(args.doc_type, config, diff_only=args.diff_only)
 
     print(f"\nDone! Files saved to: {args.output}")
 
