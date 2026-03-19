@@ -1,0 +1,34 @@
+#!/bin/bash
+# Post-commit hook for CSV Documentation Generator
+# Runs compliance check after commits that modify requirements or code
+
+# Check if we're in a CSV documentation project
+if [ ! -f "requirements.json" ] && [ ! -f "generate.py" ]; then
+    exit 0
+fi
+
+# Get list of committed files
+COMMITTED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD)
+
+# Check if any relevant files were changed
+RELEVANT_FILES=$(echo "$COMMITTED_FILES" | grep -E '\.(py|js|ts|java|cs|cpp|h|c)$|^requirements.*\.json$|^src/.*' || true)
+
+if [ -z "$RELEVANT_FILES" ]; then
+    exit 0
+fi
+
+# Check if compliance checker is available
+if ! command -v python3 &> /dev/null; then
+    exit 0
+fi
+
+# Only run check if generate.py exists (this is a CSV doc project)
+if [ ! -f "scripts/generate.py" ]; then
+    exit 0
+fi
+
+# Run compliance check (non-blocking, output to stderr)
+echo "" >&2
+echo "Running compliance check..." >&2
+cd "$(dirname "$0")/../.." 2>/dev/null || exit 0
+python3 scripts/generate.py check --requirements requirements.json --test-results test_results.json 2>/dev/null || true
