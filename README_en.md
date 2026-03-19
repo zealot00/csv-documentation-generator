@@ -372,6 +372,41 @@ Code Annotation Rules (for GxP traceability):
 
 See [`STANDARDS.md`](STANDARDS.md) for full documentation.
 
+## Agent Mode
+
+This skill supports two operating modes:
+
+### Mode Description
+
+| Mode | Description | Trigger |
+|------|-------------|---------|
+| **interactive** | Shows confirmation prompts | Default mode |
+| **autonomous** | Executes automatically without confirmation | OpenClaw agent environment |
+
+### Detection Order
+
+1. Environment variable `CSV_DOCS_MODE` (highest priority)
+2. Environment variable `OPENCLAW_MODE` → autonomous mode
+3. Project config `.csv-docs-config.json` `default_mode`
+4. Default: `interactive`
+
+### Manual Mode Setting
+
+```bash
+# Check current agent mode
+csv-docs agent
+
+# Set autonomous mode manually
+csv-docs agent --set autonomous
+
+# Set interactive mode manually
+csv-docs agent --set interactive
+```
+
+### Non-Interactive Execution
+
+When a non-interactive environment is detected (stdin unavailable), the skill automatically switches to autonomous mode and adds all requirements.
+
 ## FAQ
 
 ### Q1: python-docx not installed

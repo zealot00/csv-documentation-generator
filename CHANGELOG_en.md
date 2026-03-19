@@ -2,6 +2,19 @@
 
 All notable version updates are documented here.
 
+## [1.6.1] - 2026-03-20
+
+### Fixed
+
+#### CLI Error Handling Improvement
+- **EOFError handling**: When running in non-interactive mode (e.g., AI agent usage), automatically falls back to autonomous mode
+- No longer throws EOFError, instead switches mode and continues execution
+
+#### UX Improvements
+- **--verbose flag**: New `-v/--verbose` parameter to show detailed generation progress
+- **Auto compliance check**: After `generate all`, automatically checks requirements.json and displays compliance issues
+- **Agent Mode documentation**: Added Agent Mode section in README
+
 ## [1.6.0] - 2026-03-19
 
 ### Added

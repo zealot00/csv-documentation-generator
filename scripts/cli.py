@@ -134,7 +134,11 @@ def cmd_parse(project_path, args, mode):
         print("  [s] 选择性添加")
         print("  [c] 取消")
 
-        choice = input("\n> ").strip().lower()
+        try:
+            choice = input("\n> ").strip().lower()
+        except EOFError:
+            print("\n检测到非交互式环境，自动切换到 autonomous 模式")
+            choice = "a"
 
         if choice == "a":
             for req in requirements:
@@ -146,7 +150,19 @@ def cmd_parse(project_path, args, mode):
             print(f"已添加 {len(requirements)} 个需求")
         elif choice == "s":
             print("请输入要添加的编号（逗号分隔）:")
-            indices = input("> ").strip()
+            try:
+                indices = input("> ").strip()
+            except EOFError:
+                print("非交互式环境，无法进行选择性添加，使用 autonomous 模式")
+                choice = "a"
+                for req in requirements:
+                    parser.requirements_db.setdefault("requirements", []).append(
+                        req.__dict__
+                    )
+                    audit.log_requirement_added(req.id, req.description, mode)
+                parser._save_requirements_db()
+                print(f"已添加 {len(requirements)} 个需求")
+                return 0
             try:
                 selected = [requirements[int(i) - 1] for i in indices.split(",")]
                 for req in selected:

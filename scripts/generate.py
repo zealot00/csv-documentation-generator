@@ -324,6 +324,13 @@ Examples:
     )
 
     parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Show detailed progress information during generation",
+    )
+
+    parser.add_argument(
         "--project-root",
         dest="project_root",
         default=None,
@@ -509,8 +516,11 @@ def generate_document(
     config: Config,
     db: Optional[Dict[str, Any]] = None,
     diff_only: bool = False,
+    verbose: bool = False,
 ):
     """Generate a single document"""
+
+    verbose_print = print if verbose else lambda *args, **kwargs: None
 
     # Get template loader
     template_loader = TemplateLoader()
@@ -522,12 +532,16 @@ def generate_document(
     variables["DOC_TYPE_NAME_CN"] = doc_info["name_cn"]
     variables["DOC_TYPE"] = doc_type.upper()
 
+    verbose_print(f"[VERBOSE] Generating {doc_type}...")
+
     # Determine format
     format_type = doc_info.get("format", "docx")
     if config.format == "both":
         generate_formats = [format_type] if format_type != "both" else ["docx", "xlsx"]
     else:
         generate_formats = [config.format]
+
+    verbose_print(f"[VERBOSE] Format: {generate_formats}")
 
     # Load requirements database for vsr and rtm
     if db is None and doc_type in ["vsr", "rtm", "ra"]:
@@ -536,6 +550,7 @@ def generate_document(
         )
         db_path = find_requirements_db(project_path)
         if db_path:
+            verbose_print(f"[VERBOSE] Found requirements DB at: {db_path}")
             try:
                 with open(db_path, "r", encoding="utf-8") as f:
                     db = json.load(f)
@@ -618,8 +633,10 @@ def generate_document(
     return output_files
 
 
-def generate_all(config: Config, diff_only: bool = False):
+def generate_all(config: Config, diff_only: bool = False, verbose: bool = False):
     """Generate all documents"""
+
+    verbose_print = print if verbose else lambda *args, **kwargs: None
 
     doc_types = [
         "vp",
@@ -642,9 +659,13 @@ def generate_all(config: Config, diff_only: bool = False):
 
     all_files = []
 
-    for doc_type in doc_types:
+    for i, doc_type in enumerate(doc_types, 1):
+        verbose_print(f"[VERBOSE] [{i}/{len(doc_types)}] Processing {doc_type}...")
         try:
-            files = generate_document(doc_type, config, diff_only=diff_only)
+            files = generate_document(
+                doc_type, config, diff_only=diff_only, verbose=verbose
+            )
+            verbose_print(f"[VERBOSE]   Generated {len(files)} file(s)")
             all_files.extend(files)
         except Exception as e:
             print(f"Error generating {doc_type}: {e}")
@@ -653,6 +674,31 @@ def generate_all(config: Config, diff_only: bool = False):
     print(f"Generated {len(all_files)} documents:")
     for f in all_files:
         print(f"  - {f}")
+
+    # Auto-run compliance check if requirements.json exists
+    project_path = (
+        Path(config.output).parent if config.output != "./output" else Path.cwd()
+    )
+    req_path = find_requirements_db(project_path)
+    if req_path:
+        verbose_print(f"\n[VERBOSE] Running compliance check...")
+        try:
+            from compliance_checker import ComplianceChecker
+
+            checker = ComplianceChecker(req_path)
+            checker.load_data()
+            exit_code, issues = checker.check()
+            if issues:
+                print(f"\n⚠️  Compliance issues found ({len(issues)}):")
+                for issue in issues[:5]:  # Show first 5 issues
+                    print(f"  - {issue}")
+                if len(issues) > 5:
+                    print(f"  ... and {len(issues) - 5} more")
+                print("  Run 'generate.py check' for full report")
+            else:
+                verbose_print("[VERBOSE] ✓ No compliance issues found")
+        except Exception as e:
+            verbose_print(f"[VERBOSE] Compliance check skipped: {e}")
 
     return all_files
 
@@ -1587,14 +1633,17 @@ def main():
             )
 
     # Generate documents
+    verbose = getattr(args, "verbose", False)
     if args.interactive:
         run_interactive_workflow(config, project_path, args)
     elif args.doc_type == "check":
         run_compliance_check(args)
     elif args.doc_type == "all":
-        generate_all(config, diff_only=args.diff_only)
+        generate_all(config, diff_only=args.diff_only, verbose=verbose)
     else:
-        generate_document(args.doc_type, config, diff_only=args.diff_only)
+        generate_document(
+            args.doc_type, config, diff_only=args.diff_only, verbose=verbose
+        )
 
     print(f"\nDone! Files saved to: {args.output}")
 

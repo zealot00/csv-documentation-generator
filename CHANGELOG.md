@@ -4,6 +4,19 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.6.1] - 2026-03-20
+
+### Fixed
+
+#### CLI 错误处理改进
+- **EOFError 处理**: 当非交互式运行时（如 AI agent 使用），自动 fallback 到 autonomous 模式
+- 不再抛出 EOFError，而是自动切换模式并继续执行
+
+#### UX 改进
+- **--verbose flag**: 新增 `-v/--verbose` 参数，显示详细生成进度
+- **Compliance check 自动运行**: `generate all` 后自动检查 requirements.json 并显示合规问题
+- **Agent Mode 文档化**: 在 README 中添加 Agent Mode 说明章节
+
 ## [1.6.0] - 2026-03-19
 
 ### Added

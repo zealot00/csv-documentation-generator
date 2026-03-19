@@ -308,6 +308,41 @@ Code Annotation Rules (for GxP traceability):
 
 详细说明请参阅 [`STANDARDS.md`](STANDARDS.md)。
 
+## Agent Mode
+
+本 Skill 支持两种运行模式：
+
+### 模式说明
+
+| 模式 | 说明 | 触发条件 |
+|------|------|---------|
+| **interactive** | 交互模式，会显示确认提示 | 默认模式 |
+| **autonomous** | 自动模式，无需确认直接执行 | OpenClaw agent 环境变量 |
+
+### 模式检测顺序
+
+1. 环境变量 `CSV_DOCS_MODE`（优先级最高）
+2. 环境变量 `OPENCLAW_MODE` → 自动模式
+3. 项目配置 `.csv-docs-config.json` 中的 `default_mode`
+4. 默认：`interactive`
+
+### 手动设置模式
+
+```bash
+# 查看当前 agent 模式
+csv-docs agent
+
+# 手动设置 autonomous 模式
+csv-docs agent --set autonomous
+
+# 手动设置 interactive 模式
+csv-docs agent --set interactive
+```
+
+### 非交互式运行
+
+当检测到非交互式环境（stdin 不可用）时，Skill 会自动切换到 autonomous 模式并自动添加所有需求。
+
 ## 常见问题
 
 ### 问题 1: python-docx 未安装
