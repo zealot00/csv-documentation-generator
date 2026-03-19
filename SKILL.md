@@ -18,7 +18,7 @@ triggers:
   - "LIMS"
   - "医疗器械"
 category: gxp-compliance
-version: "1.3.3"
+version: "1.3.4"
 author: zealot00
 homepage: https://github.com/zealot00/csv-documentation-generator
 repository: https://github.com/zealot00/csv-documentation-generator
@@ -360,16 +360,18 @@ def assign_role(user_id: str, role: str) -> bool:
 
 ### Standard Modules
 
-| Module ID | 中文名 | English Name | URS Section | Test Prefix |
-|-----------|--------|--------------|-------------|-------------|
-| `user_mgmt` | 用户管理 | User Management | 4.1 | UM |
-| `audit_trail` | 审计追踪 | Audit Trail | 4.2 | AT |
-| `data_mgmt` | 数据管理 | Data Management | 4.3 | DM |
-| `business_func` | 业务功能 | Business Functions | 4.4 | BF |
-| `reporting` | 报告功能 | Reporting | 4.5 | RP |
-| `integration` | 接口集成 | Integration | 4.6 | INT |
-| `security` | 安全 | Security | 5.2 | SEC |
-| `compliance` | 合规 | Compliance | 3.X | CMP |
+| Module ID | 中文名 | English Name | Test Prefix |
+|-----------|--------|--------------|-------------|
+| `user_mgmt` | 用户管理 | User Management | UM |
+| `audit_trail` | 审计追踪 | Audit Trail | AT |
+| `data_mgmt` | 数据管理 | Data Management | DM |
+| `business_func` | 业务功能 | Business Functions | BF |
+| `reporting` | 报告功能 | Reporting | RP |
+| `integration` | 接口集成 | Integration | INT |
+| `security` | 安全 | Security | SEC |
+| `compliance` | 合规 | Compliance | CMP |
+
+**注意**: 章节号（4.X）是动态分配的，基于模板中已有的章节。同步时会自动为新模块分配下一个可用编号。
 
 ### Test Case ID Format
 

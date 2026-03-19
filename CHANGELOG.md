@@ -4,6 +4,14 @@
 
 **[English Version](CHANGELOG_en.md)**
 
+## [1.3.4] - 2026-03-19
+
+### Changed
+
+#### 文档更新
+- **Standard Modules 表格**: 删除 "URS Section" 列（原列与动态编号行为不一致）
+- 添加说明：章节号是动态分配的，基于模板中已有的章节
+
 ## [1.3.3] - 2026-03-19
 
 ### Fixed
