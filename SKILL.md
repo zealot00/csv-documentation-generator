@@ -181,6 +181,47 @@ AI agents should guide users to select the appropriate category based on GAMP 5 
 | `--output` | Output directory | Yes |
 | `--format` | Output format: docx, xlsx, or both (default: both) | No |
 
+## Output Format Standards
+
+All generated documents follow consistent naming and formatting rules:
+
+### Document Naming Convention
+
+| Document Type | Format | Example |
+|--------------|--------|---------|
+| Validation Plan | `{TYPE}_{PROJECT}.{ext}` | VP_XX系统.docx |
+| User Requirements | `{TYPE}_{PROJECT}.{ext}` | URS_XX系统.docx |
+| Functional Specification | `{TYPE}_{PROJECT}.{ext}` | FS_XX系统.docx |
+| Traceability Matrix | `RTM_{PROJECT}.{ext}` | RTM_XX系统.xlsx |
+
+### Output Directory Structure
+
+```
+{output_dir}/
+├── VP_项目名.docx
+├── URS_项目名.docx
+├── FS_项目名.docx
+├── TS_项目名.docx
+├── RA_项目名.docx
+├── IQ_项目名.docx
+├── OQ_项目名.docx
+├── PQ_项目名.docx
+├── VSR_项目名.docx
+├── RTM_项目名.xlsx
+└── CHECKLIST_项目名.xlsx
+```
+
+### Document Styling Standards
+
+**Fonts:**
+- Chinese text: SimSun (宋体)
+- English text: Arial
+
+**Colors:**
+- Table headers: #2563EB (Royal Blue) with white text
+- Priority markers: [必须] (red), [应该] (amber), [可以] (green)
+- Test results: [通过] (green), [失败] (red), [待测] (amber)
+
 ## Template Variables
 
 Common variables used in templates:
