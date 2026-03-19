@@ -28,7 +28,7 @@ from config import Config, get_gamp_category_description
 from template_loader import TemplateLoader
 from word_generator import WordGenerator
 from excel_generator import ExcelGenerator
-from requirements.parser import STANDARD_MODULES
+from requirements.parser import STANDARD_MODULES, RequirementsParser
 
 
 def get_skill_root():
@@ -267,6 +267,19 @@ Examples:
         dest="db_path",
         default=None,
         help="Path to requirements.json database file",
+    )
+
+    parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Interactive step-by-step mode with confirmation prompts",
+    )
+
+    parser.add_argument(
+        "--auto",
+        action="store_true",
+        default=True,
+        help="Auto mode (default) - generate without confirmation",
     )
 
     return parser.parse_args()
@@ -902,6 +915,98 @@ def _infer_module_from_description(description: str) -> str:
     return "business_func"
 
 
+def run_interactive_workflow(config: Config, project_path: Path, args) -> None:
+    """Interactive step-by-step document generation workflow
+
+    For each step:
+    - Press Enter to continue
+    - Type 's' to skip
+    - Type 'q' to quit
+    """
+
+    steps = [
+        ("解析代码注释", "parse"),
+        ("同步需求到数据库", "sync-template-to-db"),
+        ("同步需求到模板", "sync"),
+        ("生成 URS", "urs"),
+        ("生成 FS", "fs"),
+        ("生成 RA", "ra"),
+        ("生成 IQ", "iq"),
+        ("生成 OQ", "oq"),
+        ("生成 PQ", "pq"),
+        ("生成 RTM", "rtm"),
+        ("生成 VSR", "vsr"),
+    ]
+
+    total = len(steps)
+    generated_files = []
+
+    print("\n" + "=" * 50)
+    print("交互模式 - Interactive Mode")
+    print("=" * 50)
+    print(f"项目: {config.project}")
+    print(f"系统: {config.system}")
+    print(f"输出目录: {config.output}")
+    print("=" * 50)
+
+    for i, (step_name, step_action) in enumerate(steps, 1):
+        print(f"\n[{i}/{total}] {step_name}...")
+
+        response = input("  → 按 Enter 继续，'s' 跳过，'q' 退出: ").strip().lower()
+
+        if response == "q":
+            print("\n已退出。已生成的文件保留在 output/ 目录")
+            if generated_files:
+                print(f"\n已生成的 {len(generated_files)} 个文件:")
+                for f in generated_files:
+                    print(f"  - {f}")
+            return
+        elif response == "s":
+            print("  [跳过]")
+            continue
+
+        try:
+            if step_action == "parse":
+                parser = RequirementsParser(project_path)
+                requirements = parser.parse_directory(Path("."))
+                print(f"  ✓ 完成 (发现 {len(requirements)} 个需求)")
+
+            elif step_action == "sync-template-to-db":
+                result = sync_template_to_db("urs", project_path)
+                if result:
+                    print("  ✓ 完成")
+                else:
+                    print("  ✓ 完成 (无需同步)")
+
+            elif step_action == "sync":
+                result = sync_requirements_to_template("urs", project_path)
+                if result:
+                    print("  ✓ 完成")
+                else:
+                    print("  ✓ 完成 (模板已是最新)")
+
+            elif step_action in ["urs", "fs", "ra", "iq", "oq", "pq", "rtm", "vsr"]:
+                files = generate_document(step_action, config)
+                generated_files.extend(files)
+                for f in files:
+                    print(f"  ✓ {f}")
+
+            else:
+                print("  [未知步骤]")
+
+        except Exception as e:
+            print(f"  ✗ 错误: {e}")
+            continue
+
+    print("\n" + "=" * 50)
+    print(f"完成! 已生成 {len(generated_files)} 个文件")
+    print("=" * 50)
+    if generated_files:
+        print("\n生成的文件:")
+        for f in generated_files:
+            print(f"  - {f}")
+
+
 def main():
     """Main entry point"""
 
@@ -955,7 +1060,9 @@ def main():
             sync_requirements_to_template(doc_type, project_path)
 
     # Generate documents
-    if args.doc_type == "all":
+    if args.interactive:
+        run_interactive_workflow(config, project_path, args)
+    elif args.doc_type == "all":
         generate_all(config)
     else:
         generate_document(args.doc_type, config)

@@ -387,6 +387,37 @@ python3 scripts/generate.py urs --sync-template-to-db \
 4. Adds new requirements that don't already exist
 5. Preserves existing requirements and test results
 
+### Interactive Mode
+
+For interactive step-by-step document generation with confirmation prompts:
+
+```bash
+python3 scripts/generate.py all --interactive \
+  --project "临床系统" \
+  --system "EDC v1.0" \
+  --category 4 \
+  --output ./validation/
+```
+
+**Interactive workflow:**
+```
+[1/11] 解析代码注释...
+  → 按 Enter 继续，'s' 跳过，'q' 退出:
+
+[2/11] 同步需求到数据库...
+  → 按 Enter 继续，'s' 跳过，'q' 退出:
+
+[3/11] 生成 URS...
+  → 按 Enter 继续，'s' 跳过，'q' 退出:
+  ✓ ./output/URS_临床系统.docx
+...
+```
+
+**Options:**
+- `Enter` - Execute this step
+- `s` - Skip this step
+- `q` - Quit (already generated files are preserved)
+
 ### Important Notes
 
 #### Template Requirements Are Examples
