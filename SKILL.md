@@ -18,7 +18,7 @@ triggers:
   - "LIMS"
   - "医疗器械"
 category: gxp-compliance
-version: "1.1.3"
+version: "1.2.0"
 author: zealot00
 homepage: https://github.com/zealot00/csv-documentation-generator
 repository: https://github.com/zealot00/csv-documentation-generator
@@ -458,6 +458,72 @@ python3 scripts/generate.py all --interactive \
 - `Enter` - Execute this step
 - `s` - Skip this step
 - `q` - Quit (already generated files are preserved)
+
+### Compliance Check
+
+Run GAMP 5 compliance validation to check requirements coverage and test coverage:
+
+```bash
+# Run compliance check (text output)
+python3 scripts/generate.py check \
+  --requirements requirements.json \
+  --test-results test_results.json
+
+# Run compliance check (JSON output for CI/CD)
+python3 scripts/generate.py check \
+  --requirements requirements.json \
+  --test-results test_results.json \
+  --output-format json
+```
+
+**Compliance checks performed:**
+- Requirement coverage (ensures all code requirements are documented)
+- High-risk module verification (IQ/OQ/PQ tests for critical modules)
+- Test coverage threshold (default 80%)
+
+**Exit codes:**
+- `0` - All checks passed
+- `1` - Warnings present
+- `2` - Errors found
+
+### Incremental Update (Smart Rebuild)
+
+Use `--diff-only` to skip regeneration when requirements haven't changed:
+
+```bash
+# Only regenerate RTM if requirements changed
+python3 scripts/generate.py rtm --diff-only \
+  --project "临床系统" \
+  --system "EDC v1.0" \
+  --category 4 \
+  --output ./validation/
+```
+
+**How it works:**
+1. Computes SHA256 hash of requirements after each generation
+2. Stores hash in `.requirements.hash` in output directory
+3. On subsequent runs, compares current hash against stored hash
+4. Skips generation if hash matches (requirements unchanged)
+
+### Git Hooks (Automated Compliance)
+
+Install post-commit hooks to automatically run compliance checks after code commits:
+
+```bash
+# Install hooks locally (per-project)
+./scripts/git-hooks/install.sh --local
+
+# Install hooks globally (all projects)
+./scripts/git-hooks/install.sh --global
+
+# Uninstall hooks
+./scripts/git-hooks/install.sh --uninstall
+```
+
+**What the hook does:**
+- Detects commits with code or requirements changes
+- Runs compliance check (non-blocking)
+- Outputs warnings to stderr without blocking commit
 
 ### Important Notes
 
