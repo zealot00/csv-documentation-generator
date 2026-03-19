@@ -29,6 +29,7 @@ from template_loader import TemplateLoader
 from word_generator import WordGenerator
 from excel_generator import ExcelGenerator
 from requirements.parser import STANDARD_MODULES, RequirementsParser
+from compliance_checker import ComplianceChecker
 
 
 def get_skill_root():
@@ -195,8 +196,9 @@ Examples:
             "checklist",
             "test-case",
             "all",
+            "check",
         ],
-        help="Document type to generate",
+        help="Document type to generate (or 'check' for compliance check)",
     )
 
     parser.add_argument(
@@ -280,6 +282,30 @@ Examples:
         action="store_true",
         default=True,
         help="Auto mode (default) - generate without confirmation",
+    )
+
+    parser.add_argument(
+        "--requirements",
+        "-r",
+        dest="requirements",
+        default="requirements.json",
+        help="Path to requirements.json (for check command)",
+    )
+
+    parser.add_argument(
+        "--test-results",
+        "-t",
+        dest="test_results",
+        default="test_results.json",
+        help="Path to test_results.json (for check command)",
+    )
+
+    parser.add_argument(
+        "--output-format",
+        dest="output_format",
+        choices=["text", "json"],
+        default="text",
+        help="Output format for check command",
     )
 
     return parser.parse_args()
@@ -1007,6 +1033,37 @@ def run_interactive_workflow(config: Config, project_path: Path, args) -> None:
             print(f"  - {f}")
 
 
+def run_compliance_check(args) -> None:
+    """Run compliance check"""
+    from compliance_checker import ComplianceChecker
+    from pathlib import Path
+
+    print("CSV Documentation Generator - Compliance Check")
+    print("=" * 50)
+
+    requirements_path = (
+        Path(args.requirements)
+        if hasattr(args, "requirements") and args.requirements
+        else Path("requirements.json")
+    )
+    test_results_path = (
+        Path(args.test_results)
+        if hasattr(args, "test_results") and args.test_results
+        else Path("test_results.json")
+    )
+
+    checker = ComplianceChecker(requirements_path, test_results_path)
+    checker.load_data()
+    exit_code, issues = checker.check()
+
+    report = checker.generate_report(
+        args.output_format if hasattr(args, "output_format") else "text"
+    )
+    print(report)
+
+    sys.exit(exit_code)
+
+
 def main():
     """Main entry point"""
 
@@ -1062,6 +1119,8 @@ def main():
     # Generate documents
     if args.interactive:
         run_interactive_workflow(config, project_path, args)
+    elif args.doc_type == "check":
+        run_compliance_check(args)
     elif args.doc_type == "all":
         generate_all(config)
     else:
