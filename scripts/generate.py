@@ -30,6 +30,13 @@ from template_loader import TemplateLoader
 from word_generator import WordGenerator
 from excel_generator import ExcelGenerator
 from requirements.parser import STANDARD_MODULES, RequirementsParser
+from requirements.versioning import (
+    TEMPLATE_VERSION,
+    check_template_compatibility,
+    get_template_version,
+    set_template_version,
+    migrate_template_if_needed,
+)
 from compliance_checker import ComplianceChecker
 
 
@@ -299,6 +306,13 @@ Examples:
     )
 
     parser.add_argument(
+        "--template-version",
+        dest="template_version",
+        default=None,
+        help=f"Set template version (default: {TEMPLATE_VERSION})",
+    )
+
+    parser.add_argument(
         "--requirements",
         "-r",
         dest="requirements",
@@ -500,6 +514,17 @@ def generate_document(
             try:
                 with open(db_path, "r", encoding="utf-8") as f:
                     db = json.load(f)
+                if db:
+                    compatibility = check_template_compatibility(db)
+                    if not compatibility.compatible:
+                        print(f"Warning: {compatibility.message}")
+                        print("  Generation may produce unexpected results.")
+                    if doc_type in ["rtm", "vsr"]:
+                        db, was_migrated = migrate_template_if_needed(db)
+                        if was_migrated:
+                            print(f"[Version] Migrated template to {TEMPLATE_VERSION}")
+                            with open(db_path, "w", encoding="utf-8") as f:
+                                json.dump(db, f, indent=2, ensure_ascii=False)
             except Exception:
                 pass
 
